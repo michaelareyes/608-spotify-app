@@ -16,7 +16,6 @@ The application consists of several files, each serving a specific purpose and i
 
 5. **streamlit_variables.py**: This script utilizes the Streamlit library to create a web-based UI for visualizing user data. It communicates with the Flask application to fetch and display insights such as top artists, tracks, and track features.
 
-
 ## Connecting Files
 
 1. **main.py** interacts with **spotify_api.py** to fetch user data from Spotify's API based on user authorization.
@@ -28,13 +27,19 @@ The application consists of several files, each serving a specific purpose and i
 To set up the Spotify Data application, follow the instructions provided in the section below.
 
 ## To Run the Application
-1. If the tables do not exist yet, create DB tables using `python create_artist_table.py` or `python3 create_artist_table.py`
+
+1. If the tables do not exist yet, uncomment line 113 in create_artist_table.py and create DB tables using `python create_artist_table.py` or `python3 create_artist_table.py`
 2. My Flask app is running on port 5001, I had to modify my instance's security group and add an inbound rule for this port (similar to adding port 8501 for streamlit as we have done in class)
 3. Run the Flask application using `python main.py` or `python3 main.py`.
 4. In another terminal, run the Streamlit application using `streamlit run streamlit_variables.py`. If you get an error regarding `OSError: [Errno 28] inotify watch limit reached`, try running the app using `streamlit run streamlit_variables.py --server.fileWatcherType none` instead.
 
 ## Possible Errors You May Encounter
+
 1. Might need to change the `PUBLIC_IP` variable to your own instance's public ip address in `main.py` line 28.
+
+## Things to Note
+
+1. If modifying database structure (ie. adding/removing declared features in a table), uncomment lines 113 and 110 in `create_artist_table.py`, save and run the file to wipe out everything and create new empty tables. (There's possibly better ways to do this and definitely not best practice in real world scenarios but since we're just starting to build our DB and do not have much data yet, I think this is the simplest way to do it right now)
 
 ## Usage
 

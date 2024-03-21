@@ -25,7 +25,7 @@ The application consists of several files, each serving a specific purpose and i
 
 ## Setup
 
-To set up the Spotify Data Analyzer application, follow the instructions provided in the previous section.
+To set up the Spotify Data application, follow the instructions provided in the section below.
 
 ## To Run the Application
 1. If the tables do not exist yet, create DB tables using `python create_artist_table.py` or `python3 create_artist_table.py`

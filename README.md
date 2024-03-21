@@ -33,6 +33,9 @@ To set up the Spotify Data application, follow the instructions provided in the 
 3. Run the Flask application using `python main.py` or `python3 main.py`.
 4. In another terminal, run the Streamlit application using `streamlit run streamlit_variables.py`. If you get an error regarding `OSError: [Errno 28] inotify watch limit reached`, try running the app using `streamlit run streamlit_variables.py --server.fileWatcherType none` instead.
 
+## Possible Errors You May Encounter
+1. Might need to change the `PUBLIC_IP` variable to your own instance's public ip address in `main.py` line 28.
+
 ## Usage
 
 After setting up the application, users can access the web interface through their browser, log in with their Spotify account, and explore various functionalities for analyzing their Spotify usage data.

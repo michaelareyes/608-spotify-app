@@ -44,4 +44,3 @@ To set up the Spotify Data application, follow the instructions provided in the 
 ## Usage
 
 After setting up the application, users can access the web interface through their browser, log in with their Spotify account, and explore various functionalities for analyzing their Spotify usage data.
-

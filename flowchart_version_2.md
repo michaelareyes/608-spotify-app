@@ -1,7 +1,7 @@
 # Creating Tables in DB
 
 ```mermaid
-    graph TD
+graph LR;
     create_artist_table_py[create_artist_table.py] -->|Creates empty DB tables| engine[Database]
 
 ```
@@ -68,32 +68,46 @@ erDiagram
 # Flask App to Streamlit
 This also retrieves User-related information
 ```mermaid
-graph TD;
-    main_py[main.py] -->|Redirects to /login| login[Flask: /login]
-    login -->|Redirects to Spotify login page| AUTH_URL[Spotify Authorization URL]
-    AUTH_URL --> |Redirects to /streamlit| streamlit
-    streamlit --> |Fetches user information| Spotify_API[Spotify API]
-    Spotify_API --> |Returns information| streamlit
-    streamlit -->|Redirects to Streamlit UI| Streamlit_UI[Streamlit UI]
+sequenceDiagram
+    participant main_py as main.py
+    participant login as Flask: /login
+    participant AUTH_URL as Spotify Authorization URL
+    participant streamlit as /streamlit
+    participant Spotify_API as Spotify API
+    participant streamlit_variables as streamlit_variables.py
+
+    main_py->>login: Redirects to /login
+    login->>AUTH_URL: Redirects to Spotify login page
+    AUTH_URL->>streamlit: Redirects to /streamlit
+    streamlit->>Spotify_API: Fetches user information
+    Spotify_API->>streamlit: Returns information
+    streamlit->>streamlit_variables: Redirects to Streamlit code
+    streamlit_variables->>Streamlit UI: Redirects to Streamlit UI
+
 ```
 
 
 # Retrieval of Artist/Album/Track Information
 
 ```mermaid
-graph TD;
-    Streamlit_UI --> |User queries an Artist| spotify_db_py
-    CheckArtist -->|No| spotify_api_py[spotify_api.py]
-    spotify_api_py -->|Interacts with Spotify API| Spotify_API[Spotify API]
+sequenceDiagram
+    participant Streamlit_UI as Streamlit UI
+    participant spotify_db_py as spotify_db.py
+    participant spotify_api_py as spotify_api.py
+    participant streamlit_variables_py as streamlit_variables.py
+    participant engine as Database
 
-    spotify_db_py[spotify_db.py] -->|Check if Artist in DB| CheckArtist{Is Artist in DB?}
-    
-    CheckArtist -->|Yes| RetrieveInfo[Retrieve information from DB]
-    RetrieveInfo -->engine
-    engine --> streamlit_variables.py
-
-    streamlit_variables.py -->|Displays visualizations| Streamlit_UI[Streamlit UI]
-    
-    Spotify_API -->|Fetches relevant information & stores in DB| engine[Database]
+    Streamlit_UI->>spotify_db_py: User queries an Artist
+    spotify_db_py->>engine: Check if Artist in DB
+    alt Artist not in DB
+        engine->>spotify_api_py: No
+        spotify_api_py->>Spotify_API: Interacts with Spotify API
+        Spotify_API->>engine: Fetches relevant information & stores in DB
+        engine->>spotify_db_py: Returns information
+    else Artist in DB
+        engine->>spotify_db_py: Yes, returns information
+    end
+    spotify_db_py->>streamlit_variables_py: Returns information
+    streamlit_variables_py->>Streamlit_UI: Displays visualizations
 
 ```

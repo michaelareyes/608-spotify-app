@@ -3,7 +3,7 @@ import pandas as pd
 from sqlalchemy import create_engine, inspect
 from spotify_api import SpotifyAPI
 import json
-from NEW_create_artists_table import Tracks, Albums, Artists
+from create_artist_table import Tracks, Albums, Artists
 from sqlalchemy.orm import sessionmaker
 
 # write out connection details

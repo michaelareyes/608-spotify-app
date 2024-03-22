@@ -1,15 +1,13 @@
 import os
 import requests
-from dotenv import load_dotenv
 import json
 import requests
 import base64
 
 class SpotifyAPI:
     def __init__(self):
-        load_dotenv()
-        self.client_id = os.getenv("CLIENT_ID")
-        self.client_secret = os.getenv("CLIENT_SECRET")
+        self.client_id = 'e83d0b4c2eab4287adbd9830d18ac151'
+        self.client_secret = 'e3e62bcb12ed41bebadf1951985076b8'
         self.base_url = "https://api.spotify.com/v1/"
     
     def get_token(self):

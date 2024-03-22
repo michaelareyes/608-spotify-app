@@ -8,44 +8,75 @@ def local_css(file_name):
     with open(file_name) as f:
         st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
-local_css("style.css")
+#local_css("style.css")
 
 query_params = st.query_params.to_dict()
 
-if 'user' in query_params:
-    # Extract user-related data from query parameters
-    user_data = json.loads(query_params['user'])
-
-    display_name = user_data['username']
-    st.title(f"Welcome, {display_name}!")
+def render_page_1():
     
-    st.write("Top Tracks:")
-    top_tracks = user_data['top_tracks']
-    st.table(top_tracks)
+    if 'user' in query_params:
+    # Extract user-related data from query parameters
+        user_data = json.loads(query_params['user'])
 
-    st.write("Top Artists:")
-    top_artists = user_data['top_artists']
-    st.table(top_artists)
+        display_name = user_data['username']
+        st.title(f"Welcome, {display_name}!")
+        
+        st.write("Top Tracks:")
+        top_tracks = user_data['top_tracks']
+        st.table(top_tracks)
 
-    st.write("Top Genres:")
-    top_genres = user_data['top_genres']
-    st.table(top_genres)
+        st.write("Top Artists:")
+        top_artists = user_data['top_artists']
+        st.table(top_artists)
 
-st.title("Discography Features")
-Name_of_Artist = st.text_input("Artist Name")
+        st.write("Top Genres:")
+        top_genres = user_data['top_genres']
+        st.table(top_genres)
 
-if 'button_clicked' not in st.session_state:
-    st.session_state.button_clicked = False
+    st.title("Discography Features")
 
-button_clicked = st.button("OK")
+    if 'button_clicked' not in st.session_state:
+        st.session_state.button_clicked = False
 
-if button_clicked:
-    st.session_state.button_clicked = True
+    if not st.session_state.button_clicked:
+        st.warning("Please enter an artist name.")
+        
+    Name_of_Artist = st.text_input("Artist Name")
 
-if not st.session_state.button_clicked:
-    st.warning("Please enter an artist name.")
-else:
-    if Name_of_Artist:
+
+    # st.markdown(
+    #     """
+    #     <style>
+    #     .stButton>button {
+    #         color: #1e221e;
+    #         border-radius: 50%;
+    #         border-color: aquamarine;
+    #         height: 3em;
+    #         width: 3em;
+    #     }
+    #     </style>
+    #     """, unsafe_allow_html=True
+    # )
+
+    button_clicked = st.button("OK")
+
+    if button_clicked:
+        st.session_state.currentPage = "page2"
+        st.session_state.button_clicked = True
+        st.session_state.name_artist = Name_of_Artist
+        st.experimental_rerun()
+
+# Function to render page 2 content
+def render_page_2():
+    
+    Name_of_Artist = st.text_input("Search for Another Artist...")
+    button_clicked = st.button("Search")
+    if button_clicked:
+        st.session_state.name_artist = Name_of_Artist
+        st.experimental_rerun()
+
+    if 'name_artist' in st.session_state and st.session_state.name_artist is not None:
+        Name_of_Artist = st.session_state.name_artist
         df = search_view(Name_of_Artist)
 
         # Select only the desired columns
@@ -111,3 +142,32 @@ else:
         tracklist_trend(df)
     else:
         st.warning("Please enter an artist name.")
+
+    # st.markdown(
+    #     """
+    #     <style>
+    #     .stButton>button  {
+    #         color: #1e221e;
+    #         border-radius: 5px;
+    #         border-color: aquamarine;
+    #         height: 3em;
+    #         width: 10em;  /* Adjust the width as needed */
+    #         font-size: 1em;
+    #     }
+    #     </style>
+    #     """ ,unsafe_allow_html=True
+    # )
+    if st.button("Go back to User Dashboard"):
+        st.session_state.currentPage = "page1"
+        st.experimental_rerun()
+
+
+# Initialize session state
+if 'currentPage' not in st.session_state:
+    st.session_state.currentPage = "page1"
+
+# Render content based on current page
+if st.session_state.currentPage == "page1":
+    render_page_1()
+elif st.session_state.currentPage == "page2":
+    render_page_2()

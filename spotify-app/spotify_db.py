@@ -95,18 +95,18 @@ def create_entries(artist_data, artist_id):
                     'track_id':track_info['track_id'],
                     'track_name':track_info['track_name'],
                     'track_number':track_info['track_number'],
-                    'key' : track_info['features']['key'],
-                    'duration_ms' : track_info['features']['duration_ms'],
-                    'instrumentalness':track_info['features']['instrumentalness'],
-                    'acousticness': track_info['features']['acousticness'],
-                    'danceability' : track_info['features']['danceability'],
-                    'energy' : track_info['features']['energy'],
-                    'liveness':track_info['features']['liveness'],
-                    'speechiness':track_info['features']['speechiness'],
-                    'valence' : track_info['features']['valence'],
-                    'loudness' : track_info['features']['loudness'],
-                    'tempo':track_info['features']['tempo'],
-                    'time_signature':track_info['features']['time_signature']
+                    'key' : track_info['features'].get('key', None),
+                    'duration_ms' : track_info['features'].get('duration_ms', None),
+                    'instrumentalness':track_info['features'].get('instrumentalness', None),
+                    'acousticness': track_info['features'].get('acousticness', None),
+                    'danceability' : track_info['features'].get('danceability', None),
+                    'energy' : track_info['features'].get('energy', None),
+                    'liveness':track_info['features'].get('liveness', None),
+                    'speechiness':track_info['features'].get('speechiness', None),
+                    'valence' : track_info['features'].get('valence', None),
+                    'loudness' : track_info['features'].get('loudness', None),
+                    'tempo':track_info['features'].get('tempo', None),
+                    'time_signature':track_info['features'].get('time_signature', None)
                 }
 
                 # Append to Tracks db
@@ -178,8 +178,10 @@ def search_view(artist_name):
         if not artist_present:
 
             # Artist not in DB, create df
+            print("spotify_db: Artist not in DB")
             create_entries(artist_data, artist_id)
         
+        print("spotify_db: Extracting relevant information..")
         return extract_relevant_info(artist_id)
     
     else:

@@ -74,7 +74,8 @@ graph TD;
     AUTH_URL --> |Redirects to /streamlit| streamlit
     streamlit --> |Fetches user information| Spotify_API[Spotify API]
     Spotify_API --> |Returns information| streamlit
-    streamlit -->|Redirects to Streamlit UI| Streamlit_UI[Streamlit UI]
+    streamlit -->|Redirects to Streamlit code| streamlit_variables_py[streamlit_variables.py]
+    streamlit_variables_py --> |Displays visualization| Streamlit_UI[Streamlit UI]
 ```
 
 

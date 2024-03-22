@@ -67,7 +67,7 @@ erDiagram
 
 # Flask App to Streamlit
 This also retrieves User-related information
-<div class="mermaid">
+```mermaid
 graph TD;
     main_py[main.py] -->|Redirects to /login| login[Flask: /login]
     login -->|Redirects to Spotify login page| AUTH_URL[Spotify Authorization URL]
@@ -75,12 +75,12 @@ graph TD;
     streamlit --> |Fetches user information| Spotify_API[Spotify API]
     Spotify_API --> |Returns information| streamlit
     streamlit -->|Redirects to Streamlit UI| Streamlit_UI[Streamlit UI]
-</div>
+```
 
 
 # Retrieval of Artist/Album/Track Information
 
-<div class="mermaid">
+```mermaid
 graph TD;
     
     CheckArtist -->|No| spotify_api_py[spotify_api.py]
@@ -96,4 +96,4 @@ graph TD;
     
     Spotify_API -->|Fetches relevant information & stores in DB| engine[Database]
 
-</div>
+```

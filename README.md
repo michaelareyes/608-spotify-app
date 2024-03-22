@@ -25,7 +25,7 @@ The application to run our codes consists of several files, each serving a speci
 
 ## Connecting Files
 
-1. **streamlit_variables.py** interacts with **spotify_db.py** to send in User's queried Artist and fetch rits elated information from either our DB or Spotify's API.
+1. **streamlit_variables.py** interacts with **spotify_db.py** to send in User's queried Artist and fetch its related information from either our DB or Spotify's API.
 2. **spotify_db.py** communicates with **spotify_api.py** to store and retrieve artist, album, and track data in the PostgreSQL database.
 3. **main.py** renders the Streamlit UI using **streamlit_variables.py**, which displays insights based on the fetched user data.
 

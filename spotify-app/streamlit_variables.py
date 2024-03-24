@@ -19,60 +19,34 @@ st.set_page_config(
 
 query_params = st.query_params.to_dict()
 
+def display_image(url):
+    return f'<img src="{url}" width="100">'
+
 def query_artist():
 
-    c1, c2 = st.columns((1,1))
+    # my_expander = st.expander("**Search and Discover an Artist's Discography Features**", expanded=True)
     
-    #my_expander = c1.expander("Search and Discover an Artist's Discography Features", expanded=True)
+    # with my_expander:
     
-    with c1:
+    if 'button_clicked' not in st.session_state:
+        st.session_state.button_clicked = False
 
-        text_col, button_col = st.columns([4, 1])
+    # if not st.session_state.button_clicked:
+    #     text_col.warning("Please enter an artist name.")
+    st.header("Search and Discover an Artist's Discography Features", anchor=False)
 
-        if 'button_clicked' not in st.session_state:
-            st.session_state.button_clicked = False
+    Name_of_Artist = st.text_input("**Search and Discover an Artist's Discography Features**", 
+                                   placeholder="search artist name here...", 
+                                   label_visibility = "collapsed"
+                                    )
 
-        # if not st.session_state.button_clicked:
-        #     text_col.warning("Please enter an artist name.")
-            
-        style = """
-        <style>
-            #stButtonVoice {
-                bottom: 0;
-                margin-bottom: 0.5rem;
-            }
-        </style>
-        """
-        
-        # Inject the styling code for both elements
-        st.markdown(style, unsafe_allow_html=True)
+    button_clicked = st.button("OK", key="stButtonVoice")
 
-        with text_col:
-            
-            Name_of_Artist = st.text_input("**Search and Discover an Artist's Discography Features**", placeholder="search artist name here...")
-
-
-        # st.markdown(
-        #     """
-        #     <style>
-        #     .stButton>button {
-        #         color: #1e221e;
-        #         border-radius: 50%;
-        #         border-color: aquamarine;
-        #         height: 3em;
-        #         width: 3em;
-        #     }
-        #     </style>
-        #     """, unsafe_allow_html=True
-        # )
-        with button_col:
-            button_clicked = st.button("OK", key="stButtonVoice")
-
-        if button_clicked:
-            st.session_state.currentPage = "page2"
-            st.session_state.button_clicked = True
-            st.session_state.name_artist = Name_of_Artist
-            st.rerun()
+    if button_clicked:
+        st.session_state.currentPage = "page2"
+        st.session_state.button_clicked = True
+        st.session_state.name_artist = Name_of_Artist
+        st.rerun()
 
 def render_page_1():
     
@@ -81,22 +55,45 @@ def render_page_1():
         user_data = json.loads(query_params['user'])
 
         display_name = user_data['username']
-        st.title(f"Welcome, {display_name}!")
+        st.title(f"Welcome, {display_name}! :wave:")
 
         query_artist()
         
-        st.write("Top Tracks:")
-        top_tracks = user_data['top_tracks']
-        st.table(top_tracks)
+        st.title("Your Current Top:", anchor=False)
 
-        st.write("Top Artists:")
-        top_artists = user_data['top_artists']
-        st.table(top_artists)
+        col1, col2, col3 = st.columns(3)
 
-        st.write("Top Genres:")
-        top_genres = user_data['top_genres']
-        st.table(top_genres)
+        with col1:
 
+            st.header('Artists', anchor=False)
+            
+            for i in range(len(user_data['top_artists'])):
+
+                c1, c2= st.columns((1,5))
+
+                with c1:
+                    st.image(user_data['artist_url'][i], width = 75)
+
+                with c2:
+                    st.subheader(f'*{user_data["top_artists"][i]}*', anchor=False)
+
+        with col2:
+            st.header('Tracks', anchor=False)
+            
+            for i in range(len(user_data['top_tracks'])):
+
+                c1, c2= st.columns((1,5))
+
+                with c1:
+                    st.image(user_data['track_url'][i], width = 75)
+
+                with c2:
+                    st.subheader(f'*{user_data["top_tracks"][i]}*', anchor=False)
+        
+        with col3:
+            st.header('Genres', anchor=False)
+            for genre in user_data['top_genres'][:10]:
+                st.subheader(f'*{genre}*', anchor=False)
     
 
 # Function to render page 2 content

@@ -1,11 +1,3 @@
-"""
-
-Flask App to get Spotify OAuth & User's information
-then we pass to streamlit UI in the streamlit_ui() function
-
-"""
-
-
 import requests
 import urllib.parse
 import json
@@ -16,14 +8,6 @@ import itertools
 
 app = Flask(__name__)
 app.secret_key = 'f42fa124d2627f97aad0adbdc1ef089300087684ecd2a990'
-
-
-"""
-
-Not sure if you'd need to change the PUBLIC_IP part to your own
-public ip address in AWS if my instance is not running
-
-"""
 
 PUBLIC_IP = '44.218.178.62'
 
@@ -219,17 +203,19 @@ def streamlit_ui():
                          'response_error': response.text}
         return error_message
 
-    # GET TOP ARTISTS
+    # GET TOP 10 ARTISTS
 
-    top_artist_url = API_BASE_URL + "me/top/artists"
+    top_artist_url = API_BASE_URL + "me/top/artists?limit=10"
     artist_response = requests.get(top_artist_url, headers=headers)
 
     if artist_response.status_code == 200:
         top_artists = artist_response.json()
         names = [item['name'] for item in top_artists['items']]
+        artist_image_urls = [item['images'][2]["url"] for item in top_artists['items']] # get the one for 160px
         genres = [item['genres'] for item in top_artists['items']]
 
         user_data["top_artists"] = names
+        user_data["artist_url"] = artist_image_urls
         genres_count = Counter(list(itertools.chain(*genres)))
         user_data["top_genres"] = [genre for genre, _ in genres_count.most_common(10)]
     
@@ -239,16 +225,18 @@ def streamlit_ui():
                          'response_error': artist_response.text}
         return error_message
     
-    # GET TOP TRACKS
+    # GET TOP 10 TRACKS
     
-    top_tracks_url = API_BASE_URL + "me/top/tracks"
+    top_tracks_url = API_BASE_URL + "me/top/tracks?limit=10"
     tracks_response = requests.get(top_tracks_url, headers=headers)
 
     if tracks_response.status_code == 200:
         top_tracks = tracks_response.json()
         track_names = [item['name'] for item in top_tracks['items']]
+        track_image_urls = [item["album"]['images'][2]["url"]for item in top_tracks['items']] # get the one for 160px
         
         user_data["top_tracks"] = track_names
+        user_data["track_url"] = track_image_urls
     
     else:
         error_message = {'message': 'Failed to get user\'s top tracks ', 

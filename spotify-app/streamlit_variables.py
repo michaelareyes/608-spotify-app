@@ -9,8 +9,70 @@ def local_css(file_name):
         st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
 #local_css("style.css")
+        
+# Use the full page instead of a narrow central column
+st.set_page_config(
+    page_title="Spotify App",
+    page_icon=":notes:",
+    layout="wide"
+)
 
 query_params = st.query_params.to_dict()
+
+def query_artist():
+
+    c1, c2 = st.columns((1,1))
+    
+    #my_expander = c1.expander("Search and Discover an Artist's Discography Features", expanded=True)
+    
+    with c1:
+
+        text_col, button_col = st.columns([4, 1])
+
+        if 'button_clicked' not in st.session_state:
+            st.session_state.button_clicked = False
+
+        # if not st.session_state.button_clicked:
+        #     text_col.warning("Please enter an artist name.")
+            
+        style = """
+        <style>
+            #stButtonVoice {
+                bottom: 0;
+                margin-bottom: 0.5rem;
+            }
+        </style>
+        """
+        
+        # Inject the styling code for both elements
+        st.markdown(style, unsafe_allow_html=True)
+
+        with text_col:
+            
+            Name_of_Artist = st.text_input("**Search and Discover an Artist's Discography Features**", placeholder="search artist name here...")
+
+
+        # st.markdown(
+        #     """
+        #     <style>
+        #     .stButton>button {
+        #         color: #1e221e;
+        #         border-radius: 50%;
+        #         border-color: aquamarine;
+        #         height: 3em;
+        #         width: 3em;
+        #     }
+        #     </style>
+        #     """, unsafe_allow_html=True
+        # )
+        with button_col:
+            button_clicked = st.button("OK", key="stButtonVoice")
+
+        if button_clicked:
+            st.session_state.currentPage = "page2"
+            st.session_state.button_clicked = True
+            st.session_state.name_artist = Name_of_Artist
+            st.rerun()
 
 def render_page_1():
     
@@ -20,6 +82,8 @@ def render_page_1():
 
         display_name = user_data['username']
         st.title(f"Welcome, {display_name}!")
+
+        query_artist()
         
         st.write("Top Tracks:")
         top_tracks = user_data['top_tracks']
@@ -33,38 +97,7 @@ def render_page_1():
         top_genres = user_data['top_genres']
         st.table(top_genres)
 
-    st.title("Discography Features")
-
-    if 'button_clicked' not in st.session_state:
-        st.session_state.button_clicked = False
-
-    if not st.session_state.button_clicked:
-        st.warning("Please enter an artist name.")
-        
-    Name_of_Artist = st.text_input("Artist Name")
-
-
-    # st.markdown(
-    #     """
-    #     <style>
-    #     .stButton>button {
-    #         color: #1e221e;
-    #         border-radius: 50%;
-    #         border-color: aquamarine;
-    #         height: 3em;
-    #         width: 3em;
-    #     }
-    #     </style>
-    #     """, unsafe_allow_html=True
-    # )
-
-    button_clicked = st.button("OK")
-
-    if button_clicked:
-        st.session_state.currentPage = "page2"
-        st.session_state.button_clicked = True
-        st.session_state.name_artist = Name_of_Artist
-        st.experimental_rerun()
+    
 
 # Function to render page 2 content
 def render_page_2():
@@ -73,7 +106,7 @@ def render_page_2():
     button_clicked = st.button("Search")
     if button_clicked:
         st.session_state.name_artist = Name_of_Artist
-        st.experimental_rerun()
+        st.rerun()
 
     if 'name_artist' in st.session_state and st.session_state.name_artist is not None:
         Name_of_Artist = st.session_state.name_artist
@@ -159,7 +192,7 @@ def render_page_2():
     # )
     if st.button("Go back to User Dashboard"):
         st.session_state.currentPage = "page1"
-        st.experimental_rerun()
+        st.rerun()
 
 
 # Initialize session state
@@ -171,3 +204,6 @@ if st.session_state.currentPage == "page1":
     render_page_1()
 elif st.session_state.currentPage == "page2":
     render_page_2()
+
+
+    

@@ -3,6 +3,7 @@ import plotly.express as px
 import pandas as pd
 from spotify_db import search_view
 import json
+import asyncio
 
 def local_css(file_name):
     with open(file_name) as f:
@@ -97,7 +98,7 @@ def render_page_1():
     
 
 # Function to render page 2 content
-def render_page_2():
+async def render_page_2():
     
     Name_of_Artist = st.text_input("Search for Another Artist...")
     button_clicked = st.button("Search")
@@ -107,7 +108,7 @@ def render_page_2():
 
     if 'name_artist' in st.session_state and st.session_state.name_artist is not None:
         Name_of_Artist = st.session_state.name_artist
-        df = search_view(Name_of_Artist)
+        df = await search_view(Name_of_Artist)
 
         # Select only the desired columns
         desired_columns = ['instrumentalness', 'acousticness', 'danceability',
@@ -192,15 +193,20 @@ def render_page_2():
         st.rerun()
 
 
-# Initialize session state
-if 'currentPage' not in st.session_state:
-    st.session_state.currentPage = "page1"
+def main():
+    # Initialize session state
+    if 'currentPage' not in st.session_state:
+        st.session_state.currentPage = "page1"
 
-# Render content based on current page
-if st.session_state.currentPage == "page1":
-    render_page_1()
-elif st.session_state.currentPage == "page2":
-    render_page_2()
+    # Render content based on current page
+    if st.session_state.currentPage == "page1":
+        render_page_1()
+    elif st.session_state.currentPage == "page2":
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(render_page_2())
 
+if __name__ == "__main__":
+    main()
 
     

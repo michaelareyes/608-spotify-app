@@ -41,7 +41,7 @@ def check_artist_existence(artist_id):
 
     return query_boolean.iloc[0, 0]
 
-async def create_entries(artist_data, artist_id):
+def create_entries(artist_data, artist_id):
     spotify_api = SpotifyAPI()
 
     artist_dict = {
@@ -59,7 +59,7 @@ async def create_entries(artist_data, artist_id):
     artist_df.to_sql('artists', engine, index=False, if_exists='append')
     
     # Create Albums DB
-    discography_with_features = await spotify_api.get_discography_with_features(artist_id)
+    discography_with_features = spotify_api.get_discography_with_features(artist_id)
 
     for album_info in discography_with_features:
             
@@ -95,18 +95,18 @@ async def create_entries(artist_data, artist_id):
                     'track_id':track_info['track_id'],
                     'track_name':track_info['track_name'],
                     'track_number':track_info['track_number'],
-                    'key' : track_info['features']['key'],
-                    'duration_ms' : track_info['features']['duration_ms'],
-                    'instrumentalness':track_info['features']['instrumentalness'],
-                    'acousticness': track_info['features']['acousticness'],
-                    'danceability' : track_info['features']['danceability'],
-                    'energy' : track_info['features']['energy'],
-                    'liveness':track_info['features']['liveness'],
-                    'speechiness':track_info['features']['speechiness'],
-                    'valence' : track_info['features']['valence'],
-                    'loudness' : track_info['features']['loudness'],
-                    'tempo':track_info['features']['tempo'],
-                    'time_signature':track_info['features']['time_signature']
+                    'key' : track_info['features'].get('key', None),
+                    'duration_ms' : track_info['features'].get('duration_ms', None),
+                    'instrumentalness':track_info['features'].get('instrumentalness', None),
+                    'acousticness': track_info['features'].get('acousticness', None),
+                    'danceability' : track_info['features'].get('danceability', None),
+                    'energy' : track_info['features'].get('energy', None),
+                    'liveness':track_info['features'].get('liveness', None),
+                    'speechiness':track_info['features'].get('speechiness', None),
+                    'valence' : track_info['features'].get('valence', None),
+                    'loudness' : track_info['features'].get('loudness', None),
+                    'tempo':track_info['features'].get('tempo', None),
+                    'time_signature':track_info['features'].get('time_signature', None)
                 }
 
                 # Append to Tracks db
@@ -164,10 +164,10 @@ def extract_relevant_info(artist_id):
     return df
 
 
-async def search_view(artist_name):
+def search_view(artist_name):
     
     spotify_api = SpotifyAPI() 
-    artist_data = await spotify_api.search_for_artist(artist_name)
+    artist_data = spotify_api.search_for_artist(artist_name)
 
     if artist_data:
         artist_id = artist_data['id']
@@ -178,9 +178,40 @@ async def search_view(artist_name):
         if not artist_present:
 
             # Artist not in DB, create df
-            await create_entries(artist_data, artist_id)
+            print("spotify_db: Artist not in DB")
+            create_entries(artist_data, artist_id)
         
+        print("spotify_db: Extracting relevant information..")
         return extract_relevant_info(artist_id)
     
     else:
         return "No such artist exists!"
+
+         
+                    
+# print(search_view('David Archuleta'))
+
+# # take a look
+# print(tables)
+
+# print("Artists:")
+# # take a look at the new table
+# sql="""
+# SELECT * FROM "artists"
+# """
+# df_back = pd.read_sql_query(sql, engine)
+# print(df_back)
+
+# print("Albums:")
+# sql="""
+# SELECT * FROM "albums"
+# """
+# df_back = pd.read_sql_query(sql, engine)
+# print(df_back)
+
+# print("Tracks:")    
+# sql="""
+# SELECT * FROM "tracks"
+# """
+# df_back = pd.read_sql_query(sql, engine)
+# print(df_back)

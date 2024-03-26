@@ -3,7 +3,7 @@ import pandas as pd
 from sqlalchemy import create_engine, inspect
 from spotify_api import SpotifyAPI
 import json
-from create_artist_table import Tracks, Albums, Artists
+from create_artist_table import Tracks, Albums, Artists, artist_album_association, track_artists_association, track_albums_association
 from sqlalchemy.orm import sessionmaker
 
 # write out connection details
@@ -41,92 +41,83 @@ def check_artist_existence(artist_id):
 
     return query_boolean.iloc[0, 0]
 
-async def create_entries(artist_data, artist_id):
+async def create_entries(artist_data, artist_id, engine):
     spotify_api = SpotifyAPI()
+    conn = await engine.connect()
 
-    artist_dict = {
-        'artist_id': artist_id,
-        'name': artist_data['name'],
-        'followers': artist_data['followers']['total'],
-        'popularity': artist_data['popularity'],
-        'genres': json.dumps(artist_data['genres'])
-    }
+    try:
+        # Artist data
+        artist_dict = {
+            'artist_id': artist_id,
+            'name': artist_data['name'],
+            'followers': artist_data['followers']['total'],
+            'popularity': artist_data['popularity'],
+            'genres': json.dumps(artist_data['genres'])
+        }
 
-    # Append to Artists db
-    artist_df = pd.DataFrame(artist_dict, index=[0])
-    print("Creating Artists now...")
+        # Append to Artists db
+        artist_df = pd.DataFrame(artist_dict, index=[0])
+        await conn.execute(Artists.__table__.insert(), artist_dict)
 
-    artist_df.to_sql('artists', engine, index=False, if_exists='append')
-    
-    # Create Albums DB
-    discography_with_features = await spotify_api.get_discography_with_features(artist_id)
+        # Create Albums DB
+        discography_with_features = await spotify_api.get_discography_with_features(artist_id)
 
-    for album_info in discography_with_features:
-            
-            album_dict = {
-                    # 'aritst_id': artist_id,
-                    'album_id': album_info['album_id'],
-                    'album_type': album_info['album_type'],
-                    'album_name': album_info['album_name'],
-                    'total_tracks': album_info['total_tracks'],
-                    'available_markets': json.dumps(album_info['available_markets']),
-                    'images': json.dumps(album_info["images"])
+        # Extract album data for bulk insertion
+        album_data_list = []
+        track_data_list = []
+        album_artist_association_data_list = []
+        artist_association_data_list = []
+        album_association_data_list = []
+
+        for album_info in discography_with_features:
+            album_data = {
+                'album_id': album_info['album_id'],
+                'album_type': album_info['album_type'],
+                'album_name': album_info['album_name'],
+                'total_tracks': album_info['total_tracks'],
+                'available_markets': json.dumps(album_info['available_markets']),
+                'images': json.dumps(album_info["images"])
             }
+            album_data_list.append(album_data)
 
-            # Append to Albums db
-            print("Creating Albums now...")
-            album_df = pd.DataFrame(album_dict, index=[0])
+            album_artist_association_data = {'artist_id': artist_id, 'album_id': album_info['album_id']}
+            album_artist_association_data_list.append(album_artist_association_data)
 
-            album_df.to_sql('albums', engine, index=False, if_exists='append')
-
-            album_artist_association_data = {
-                    'artist_id': artist_id,
-                    'album_id': album_info['album_id']
-                }
-            album_artist_association_df = pd.DataFrame(album_artist_association_data, index=[0])
-            album_artist_association_df.to_sql('artist_album_association', engine, index=False, if_exists='append')
-
-            # Create Tracks
-            print("Creating Tracks now...")
             for track_info in album_info['tracks']:
-                track_dict = {
-                    # 'aritst_id': artist_id,
-                    # 'album_id': album_info['album_id'],
-                    'track_id':track_info['track_id'],
-                    'track_name':track_info['track_name'],
-                    'track_number':track_info['track_number'],
-                    'key' : track_info['features']['key'],
-                    'duration_ms' : track_info['features']['duration_ms'],
-                    'instrumentalness':track_info['features']['instrumentalness'],
+                track_data = {
+                    'track_id': track_info['track_id'],
+                    'track_name': track_info['track_name'],
+                    'track_number': track_info['track_number'],
+                    'key': track_info['features']['key'],
+                    'duration_ms': track_info['features']['duration_ms'],
+                    'instrumentalness': track_info['features']['instrumentalness'],
                     'acousticness': track_info['features']['acousticness'],
-                    'danceability' : track_info['features']['danceability'],
-                    'energy' : track_info['features']['energy'],
-                    'liveness':track_info['features']['liveness'],
-                    'speechiness':track_info['features']['speechiness'],
-                    'valence' : track_info['features']['valence'],
-                    'loudness' : track_info['features']['loudness'],
-                    'tempo':track_info['features']['tempo'],
-                    'time_signature':track_info['features']['time_signature']
+                    'danceability': track_info['features']['danceability'],
+                    'energy': track_info['features']['energy'],
+                    'liveness': track_info['features']['liveness'],
+                    'speechiness': track_info['features']['speechiness'],
+                    'valence': track_info['features']['valence'],
+                    'loudness': track_info['features']['loudness'],
+                    'tempo': track_info['features']['tempo'],
+                    'time_signature': track_info['features']['time_signature']
                 }
+                track_data_list.append(track_data)
 
-                # Append to Tracks db
-                track_df = pd.DataFrame(track_dict, index=[0])
-                
-                track_df.to_sql('tracks', engine, index=False, if_exists='append')
+                artist_association_data_list.append({'track_id': track_info['track_id'], 'artist_id': artist_id})
+                album_association_data_list.append({'track_id': track_info['track_id'], 'album_id': album_info['album_id']})
 
-                artist_association_data = {
-                    'track_id': track_info['track_id'],
-                    'artist_id': artist_id
-                }
-                association_df = pd.DataFrame(artist_association_data, index=[0])
-                association_df.to_sql('track_artists_association', engine, index=False, if_exists='append')
+        # Bulk insertion for Albums
+        await conn.execute(Albums.__table__.insert(), album_data_list)
 
-                album_association_data = {
-                    'track_id': track_info['track_id'],
-                    'album_id': album_info['album_id']
-                }
-                album_association_df = pd.DataFrame(album_association_data, index=[0])
-                album_association_df.to_sql('track_albums_association', engine, index=False, if_exists='append')
+        # Bulk insertion for associations and Tracks
+        await conn.execute(artist_album_association.insert(), album_artist_association_data_list)
+        await conn.execute(Tracks.__table__.insert(), track_data_list)
+        await conn.execute(track_artists_association.insert(), artist_association_data_list)
+        await conn.execute(track_albums_association.insert(), album_association_data_list)
+
+    finally:
+        await conn.close()
+
 
 def extract_relevant_info(artist_id):
     Session = sessionmaker(bind=engine)

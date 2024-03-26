@@ -1,4 +1,5 @@
 import sqlalchemy
+from sqlalchemy import insert
 import pandas as pd
 from sqlalchemy import create_engine, inspect
 from spotify_api import SpotifyAPI
@@ -25,6 +26,9 @@ inspector = inspect(engine)
 # use the inspector to find all the tables on the RDS
 tables = inspector.get_table_names()
 
+Session = sessionmaker(bind=engine)
+session = Session()
+
 
 def check_artist_existence(artist_id):
     query = f"""
@@ -41,9 +45,8 @@ def check_artist_existence(artist_id):
 
     return query_boolean.iloc[0, 0]
 
-async def create_entries(artist_data, artist_id, engine):
+async def create_entries(artist_data, artist_id):
     spotify_api = SpotifyAPI()
-    conn = await engine.connect()
 
     try:
         # Artist data
@@ -55,19 +58,26 @@ async def create_entries(artist_data, artist_id, engine):
             'genres': json.dumps(artist_data['genres'])
         }
 
-        # Append to Artists db
-        artist_df = pd.DataFrame(artist_dict, index=[0])
-        await conn.execute(Artists.__table__.insert(), artist_dict)
+        # Append to Artists table
+        session.bulk_insert_mappings(Artists, [artist_dict])
 
         # Create Albums DB
         discography_with_features = await spotify_api.get_discography_with_features(artist_id)
 
-        # Extract album data for bulk insertion
         album_data_list = []
         track_data_list = []
-        album_artist_association_data_list = []
-        artist_association_data_list = []
-        album_association_data_list = []
+        album_artist_association_data = {
+            'artist_id': [],
+            'album_id': []
+        }
+        track_artist_association_data = {
+            'track_id': [],
+            'artist_id': []
+        }
+        track_album_association_data = {
+            'track_id': [],
+            'album_id': []
+        }
 
         for album_info in discography_with_features:
             album_data = {
@@ -80,43 +90,68 @@ async def create_entries(artist_data, artist_id, engine):
             }
             album_data_list.append(album_data)
 
-            album_artist_association_data = {'artist_id': artist_id, 'album_id': album_info['album_id']}
-            album_artist_association_data_list.append(album_artist_association_data)
-
+            ## Album-Artist association
+            album_artist_association_data['artist_id'].append(artist_id)
+            album_artist_association_data['album_id'].append(album_info['album_id'])
+            
             for track_info in album_info['tracks']:
+
                 track_data = {
                     'track_id': track_info['track_id'],
                     'track_name': track_info['track_name'],
                     'track_number': track_info['track_number'],
-                    'key': track_info['features']['key'],
-                    'duration_ms': track_info['features']['duration_ms'],
-                    'instrumentalness': track_info['features']['instrumentalness'],
-                    'acousticness': track_info['features']['acousticness'],
-                    'danceability': track_info['features']['danceability'],
-                    'energy': track_info['features']['energy'],
-                    'liveness': track_info['features']['liveness'],
-                    'speechiness': track_info['features']['speechiness'],
-                    'valence': track_info['features']['valence'],
-                    'loudness': track_info['features']['loudness'],
-                    'tempo': track_info['features']['tempo'],
-                    'time_signature': track_info['features']['time_signature']
+                    'key' : track_info['features'].get('key', None),
+                    'duration_ms' : track_info['features'].get('duration_ms', None),
+                    'instrumentalness':track_info['features'].get('instrumentalness', None),
+                    'acousticness': track_info['features'].get('acousticness', None),
+                    'danceability' : track_info['features'].get('danceability', None),
+                    'energy' : track_info['features'].get('energy', None),
+                    'liveness':track_info['features'].get('liveness', None),
+                    'speechiness':track_info['features'].get('speechiness', None),
+                    'valence' : track_info['features'].get('valence', None),
+                    'loudness' : track_info['features'].get('loudness', None),
+                    'tempo':track_info['features'].get('tempo', None),
+                    'time_signature':track_info['features'].get('time_signature', None)
                 }
                 track_data_list.append(track_data)
 
-                artist_association_data_list.append({'track_id': track_info['track_id'], 'artist_id': artist_id})
-                album_association_data_list.append({'track_id': track_info['track_id'], 'album_id': album_info['album_id']})
+                ## Track-Artist Association
+                track_artist_association_data['artist_id'].append(artist_id)
+                track_artist_association_data['track_id'].append(track_info['track_id'])
+                
 
-        # Bulk insertion for Albums
-        await conn.execute(Albums.__table__.insert(), album_data_list)
+                ## Track-Album Association
+                track_album_association_data['album_id'].append(album_info['album_id'])
+                track_album_association_data['track_id'].append(track_info['track_id'])
+            
 
-        # Bulk insertion for associations and Tracks
-        await conn.execute(artist_album_association.insert(), album_artist_association_data_list)
-        await conn.execute(Tracks.__table__.insert(), track_data_list)
-        await conn.execute(track_artists_association.insert(), artist_association_data_list)
-        await conn.execute(track_albums_association.insert(), album_association_data_list)
+        # Bulk insertion for Albums and Tracks
+
+        session.bulk_insert_mappings(Albums, album_data_list)
+        session.bulk_insert_mappings(Tracks, track_data_list)
+
+        session.commit()
+
+        # Bulk insertion for the many-to-many relationships
+
+        album_artist_association_df = pd.DataFrame(album_artist_association_data)
+        album_artist_association_df.to_sql('artist_album_association', engine, index=False, if_exists='append')
+
+        association_df = pd.DataFrame(track_artist_association_data)
+        association_df.to_sql('track_artists_association', engine, index=False, if_exists='append')
+
+        album_association_df = pd.DataFrame(track_album_association_data)
+        album_association_df.to_sql('track_albums_association', engine, index=False, if_exists='append')
+
+
+    except Exception as e:
+        # Rollback the transaction if an error occurs
+        session.rollback()
+        raise e
 
     finally:
-        await conn.close()
+        # Close the session
+        session.close()
 
 
 def extract_relevant_info(artist_id):

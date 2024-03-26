@@ -48,7 +48,7 @@ To run both files simultaneously, we recommend using a tool like tmux to manage 
 1. Open a new tmux session by typing tmux in your terminal and pressing Enter.
 2. Split the window vertically or horizontally using the appropriate tmux commands.
 3. Navigate to the directory containing your Flask and Streamlit files in each tmux pane.
-4. Run python main.py in one pane and streamlit run streamlit_variables.py in the other.
+4. Run python main.py (or python3 main.py) in one pane and streamlit run streamlit_variables.py in the other.
 5. You can switch between tmux panes using the designated tmux shortcuts.
 
 By following these steps, you can run both the Flask and Streamlit applications simultaneously within the same tmux session, making it easier to manage and monitor the application's execution.

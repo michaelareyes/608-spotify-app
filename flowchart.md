@@ -83,8 +83,8 @@ graph TD;
 
     subgraph AWSLambda["<i>AWS Lambda</i>"]
         
-        API --> |Fetches user information| Spotify_API[Spotify API]
-        Spotify_API --> |Returns information| API
+        API -.-> |Fetches user information| Spotify_API[Spotify API]
+        Spotify_API -.-> |Returns information| API
         
     end
 ```

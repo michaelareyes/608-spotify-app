@@ -67,13 +67,14 @@ class SpotifyAPI:
 
         tracks_info = []
         for track, features in zip(json_result, track_features):
-            tracks_info.append({
+            tracks_dict = {
                 "track_name": track["name"],
                 "track_id": track["id"],
                 "track_number": track["track_number"],
-                "artists": track["artists"],
-                "features": features
-            })
+                "artists": track["artists"]
+            }
+            tracks_dict.update(features)
+            tracks_info.append(tracks_dict)
 
         return tracks_info
 
@@ -108,12 +109,3 @@ class SpotifyAPI:
 
         return discography_with_features
 
-
-# artist_name = 'Drake'
-# spotify_api = SpotifyAPI() 
-# artist_data = spotify_api.search_for_artist(artist_name)
-
-# if artist_data:
-#     artist_id = artist_data['id']
-#     discography_with_features = spotify_api.get_discography_with_features(artist_id)
-#     discography_with_features

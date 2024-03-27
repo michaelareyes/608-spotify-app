@@ -1,8 +1,8 @@
 import streamlit as st
 import plotly.express as px
 import pandas as pd
-from spotify_db import search_view
 import json
+import requests
 
 def local_css(file_name):
     with open(file_name) as f:
@@ -96,6 +96,53 @@ def render_page_1():
                 st.subheader(f'*{genre}*', anchor=False)
     
 
+base_url = 'https://2aldcvzbbj.execute-api.us-east-1.amazonaws.com/'
+
+def radar_chart(avg_df):
+
+    # Create a radar chart using Plotly Express
+    fig = px.line_polar(
+        avg_df, r="value", theta="feature", line_close=True,
+        title="Average Features Radar Chart"
+    )
+    
+    # Display the radar chart
+    st.plotly_chart(fig)
+
+def tracklist_trend(df):
+
+    desired_columns = ['instrumentalness', 'acousticness', 'danceability',
+                        'energy', 'liveness', 'speechiness', 'valence']
+
+    # Default selection for feature and albums
+    selected_feature = st.selectbox("Select Feature", desired_columns, index=desired_columns.index('energy'))
+    selected_albums = df['album_name'].unique()[:5]
+
+    # Create multiselect for selecting albums
+    selected_albums = st.multiselect("Select Albums", df['album_name'].unique(), default=selected_albums)
+
+    # Limit the number of selected albums to 5
+    if len(selected_albums) > 5:
+        st.warning("Please select only 5 albums.")
+        selected_albums = selected_albums[:5]
+
+    # Filter data based on user selections
+    filtered_df = df[df['album_name'].isin(selected_albums)]
+    filtered_df = filtered_df.groupby('album_name').apply(lambda x: x.sort_values('track_number')).reset_index(drop=True)
+    filtered_df = filtered_df.rename(columns={'album_name': 'Album', 'track_number': 'Track Number', selected_feature:selected_feature.capitalize()})
+
+    # Plot default line chart
+    if not filtered_df.empty:
+        fig = px.line(filtered_df, x='Track Number', y=selected_feature.capitalize(), color='Album', title=f"{selected_feature.capitalize()} Comparison for Selected Albums")
+
+        # Customize legend labels to cut album names but show full name when hovered
+        fig.for_each_trace(lambda trace: trace.update(name=trace.name[:20] + '...' if len(trace.name) > 20 else trace.name))
+        fig.update_traces(mode="markers+lines")
+
+        st.plotly_chart(fig)
+    else:
+        st.write("No data available for selected albums.")
+
 # Function to render page 2 content
 def render_page_2():
     
@@ -107,86 +154,39 @@ def render_page_2():
 
     if 'name_artist' in st.session_state and st.session_state.name_artist is not None:
         Name_of_Artist = st.session_state.name_artist
-        df = search_view(Name_of_Artist)
+        params = {'artist': Name_of_Artist}
 
-        # Select only the desired columns
-        desired_columns = ['instrumentalness', 'acousticness', 'danceability',
-                            'energy', 'liveness', 'speechiness', 'valence']
-        df_selected = df[desired_columns]
+        # Make an HTTP GET request to the API endpoint for SEARCH
+        response = requests.get(base_url + "search", params=params)
 
-        # Streamlit Charts
-
-        def radar_chart(df):
-
-            avg_values = df.mean()
-
-            avg_df = pd.DataFrame({"feature": avg_values.index, "value": avg_values.values})
-
-            # Create a radar chart using Plotly Express
-            fig = px.line_polar(
-                avg_df, r="value", theta="feature", line_close=True,
-                title="Average Features Radar Chart"
-            )
+        if response.status_code == 200:
             
+            data = response.json()
+
+            df = pd.read_json(data["df"])
+
+            radar_chart_df = pd.read_json(data["radar_chart"])
+
+            # Streamlit Charts
+
             # Display the radar chart
-            st.plotly_chart(fig)
+            st.write("Radar Chart")
+            radar_chart(radar_chart_df)
 
-        # Display the radar chart
-        st.write("Radar Chart")
-        radar_chart(df_selected)
+            ## Tracklist Trend
 
-        ## Tracklist Trend
-
-        def tracklist_trend(df):
-
-            # Default selection for feature and albums
-            selected_feature = st.selectbox("Select Feature", desired_columns, index=desired_columns.index('energy'))
-            selected_albums = df['album_name'].unique()[:5]
-
-            # Create multiselect for selecting albums
-            selected_albums = st.multiselect("Select Albums", df['album_name'].unique(), default=selected_albums)
-
-            # Limit the number of selected albums to 5
-            if len(selected_albums) > 5:
-                st.warning("Please select only 5 albums.")
-                selected_albums = selected_albums[:5]
-
-            # Filter data based on user selections
-            filtered_df = df[df['album_name'].isin(selected_albums)]
-            filtered_df = filtered_df.groupby('album_name').apply(lambda x: x.sort_values('track_number')).reset_index(drop=True)
-            filtered_df = filtered_df.rename(columns={'album_name': 'Album', 'track_number': 'Track Number', selected_feature:selected_feature.capitalize()})
-
-            # Plot default line chart
-            if not filtered_df.empty:
-                fig = px.line(filtered_df, x='Track Number', y=selected_feature.capitalize(), color='Album', title=f"{selected_feature.capitalize()} Comparison for Selected Albums")
-
-                # Customize legend labels to cut album names but show full name when hovered
-                fig.for_each_trace(lambda trace: trace.update(name=trace.name[:20] + '...' if len(trace.name) > 20 else trace.name))
-                fig.update_traces(mode="markers+lines")
-
-                st.plotly_chart(fig)
-            else:
-                st.write("No data available for selected albums.")
-
-        st.write("Tracklist Trend")
-        tracklist_trend(df)
+            st.write("Tracklist Trend")
+            tracklist_trend(df)
+            
+        else:
+            return {
+                'Error': 'Error in search_view()',
+                'status_code': response.status_code,
+                'message': response.text
+            }
     else:
         st.warning("Please enter an artist name.")
 
-    # st.markdown(
-    #     """
-    #     <style>
-    #     .stButton>button  {
-    #         color: #1e221e;
-    #         border-radius: 5px;
-    #         border-color: aquamarine;
-    #         height: 3em;
-    #         width: 10em;  /* Adjust the width as needed */
-    #         font-size: 1em;
-    #     }
-    #     </style>
-    #     """ ,unsafe_allow_html=True
-    # )
     if st.button("Go back to User Dashboard"):
         st.session_state.currentPage = "page1"
         st.rerun()

@@ -1,45 +1,34 @@
-import sqlalchemy
 import pandas as pd
-from sqlalchemy import create_engine, inspect
 from spotify_api import SpotifyAPI
 import json
-from create_artist_table import Tracks, Albums, Artists
-from sqlalchemy.orm import sessionmaker
-
-# write out connection details
-conf ={
-    'host':"spotify-db.c7g00umc0fcv.us-east-1.rds.amazonaws.com",
-    'port':'5432',
-    'database':"spotify-db",
-    'user':"postgres",
-    'password':"ILoveSpotify"
-}
-
-# create an engine that we can use to interact with our database
-engine = create_engine("postgresql://{user}:{password}@{host}/{user}".format(**conf))
-print(engine)
-
-# build an inspector
-inspector = inspect(engine)
-
-# use the inspector to find all the tables on the RDS
-tables = inspector.get_table_names()
+import boto3
+import awswrangler as wr
+from decimal import Decimal
 
 
 def check_artist_existence(artist_id):
-    query = f"""
 
-    SELECT EXISTS (
-        SELECT 1 
-        FROM artists 
-        WHERE artist_id = %s
-    );
+    dynamodb = boto3.client('dynamodb')
 
-    """
+    table_name = 'artists'
 
-    query_boolean = pd.read_sql_query(query, engine, params=(artist_id,))
+    # Define the query parameters
+    query_params = {
+        'TableName': table_name,
+        'KeyConditionExpression': 'artist_id = :artist_id',
+        'ExpressionAttributeValues': {
+            ':artist_id': {'S': artist_id} 
+        }
+    }
 
-    return query_boolean.iloc[0, 0]
+    # Perform the query operation
+    response = dynamodb.query(**query_params)
+
+    # Check if any items were returned
+    if 'Items' in response and len(response['Items']) > 0:
+        return True
+    else:
+        return False
 
 def create_entries(artist_data, artist_id):
     spotify_api = SpotifyAPI()
@@ -56,10 +45,25 @@ def create_entries(artist_data, artist_id):
     artist_df = pd.DataFrame(artist_dict, index=[0])
     print("Creating Artists now...")
 
-    artist_df.to_sql('artists', engine, index=False, if_exists='append')
+    wr.dynamodb.put_df(df=artist_df, table_name='artists')
     
     # Create Albums DB
     discography_with_features = spotify_api.get_discography_with_features(artist_id)
+
+    album_data_list = []
+    track_data_list = []
+    album_artist_association_data = {
+        'artist_id': [],
+        'album_id': []
+    }
+    track_artist_association_data = {
+        'track_id': [],
+        'artist_id': []
+    }
+    track_album_association_data = {
+        'track_id': [],
+        'album_id': []
+    }
 
     for album_info in discography_with_features:
             
@@ -73,94 +77,139 @@ def create_entries(artist_data, artist_id):
                     'images': json.dumps(album_info["images"])
             }
 
-            # Append to Albums db
+            # Append to Albums list
             print("Creating Albums now...")
-            album_df = pd.DataFrame(album_dict, index=[0])
+            album_data_list.append(album_dict)
 
-            album_df.to_sql('albums', engine, index=False, if_exists='append')
-
-            album_artist_association_data = {
-                    'artist_id': artist_id,
-                    'album_id': album_info['album_id']
-                }
-            album_artist_association_df = pd.DataFrame(album_artist_association_data, index=[0])
-            album_artist_association_df.to_sql('artist_album_association', engine, index=False, if_exists='append')
+            ## Album-Artist association
+            album_artist_association_data['artist_id'].append(artist_id)
+            album_artist_association_data['album_id'].append(album_info['album_id'])
 
             # Create Tracks
             print("Creating Tracks now...")
             for track_info in album_info['tracks']:
                 track_dict = {
-                    # 'aritst_id': artist_id,
-                    # 'album_id': album_info['album_id'],
                     'track_id':track_info['track_id'],
                     'track_name':track_info['track_name'],
                     'track_number':track_info['track_number'],
-                    'key' : track_info['features'].get('key', None),
-                    'duration_ms' : track_info['features'].get('duration_ms', None),
-                    'instrumentalness':track_info['features'].get('instrumentalness', None),
-                    'acousticness': track_info['features'].get('acousticness', None),
-                    'danceability' : track_info['features'].get('danceability', None),
-                    'energy' : track_info['features'].get('energy', None),
-                    'liveness':track_info['features'].get('liveness', None),
-                    'speechiness':track_info['features'].get('speechiness', None),
-                    'valence' : track_info['features'].get('valence', None),
-                    'loudness' : track_info['features'].get('loudness', None),
-                    'tempo':track_info['features'].get('tempo', None),
-                    'time_signature':track_info['features'].get('time_signature', None)
+                    'key' : track_info.get('key', None),
+                    'duration_ms' : track_info.get('duration_ms', None),
+                    'instrumentalness':track_info.get('instrumentalness', None),
+                    'acousticness': track_info.get('acousticness', None),
+                    'danceability' : track_info.get('danceability', None),
+                    'energy' : track_info.get('energy', None),
+                    'liveness':track_info.get('liveness', None),
+                    'speechiness':track_info.get('speechiness', None),
+                    'valence' : track_info.get('valence', None),
+                    'loudness' : track_info.get('loudness', None),
+                    'tempo':track_info.get('tempo', None),
+                    'time_signature':track_info.get('time_signature', None)
                 }
 
                 # Append to Tracks db
-                track_df = pd.DataFrame(track_dict, index=[0])
+                track_data_list.append(track_dict)
+
+                ## Track-Artist Association
+                track_artist_association_data['artist_id'].append(artist_id)
+                track_artist_association_data['track_id'].append(track_info['track_id'])
                 
-                track_df.to_sql('tracks', engine, index=False, if_exists='append')
 
-                artist_association_data = {
-                    'track_id': track_info['track_id'],
-                    'artist_id': artist_id
-                }
-                association_df = pd.DataFrame(artist_association_data, index=[0])
-                association_df.to_sql('track_artists_association', engine, index=False, if_exists='append')
+                ## Track-Album Association
+                track_album_association_data['album_id'].append(album_info['album_id'])
+                track_album_association_data['track_id'].append(track_info['track_id'])
 
-                album_association_data = {
-                    'track_id': track_info['track_id'],
-                    'album_id': album_info['album_id']
-                }
-                album_association_df = pd.DataFrame(album_association_data, index=[0])
-                album_association_df.to_sql('track_albums_association', engine, index=False, if_exists='append')
+    # Insert into DynamoDB
+    album_df = pd.DataFrame(album_data_list)
+    track_df = pd.DataFrame(track_data_list)
+
+    float_cols = ['instrumentalness', 'acousticness', 'danceability', 'danceability',
+                  'energy', 'liveness', 'speechiness', 'valence', 'loudness', 'tempo']
+
+    for col in float_cols:
+        track_df[col] = track_df[col].apply(lambda x: Decimal(str(x)) if pd.notnull(x) else x)
+
+    album_artist_association_df = pd.DataFrame(album_artist_association_data)
+    track_artist_association_df = pd.DataFrame(track_artist_association_data)
+    track_album_association_df = pd.DataFrame(track_album_association_data)
+
+    wr.dynamodb.put_df(df=album_df, table_name='albums')
+    wr.dynamodb.put_df(df=track_df, table_name='tracks')
+    wr.dynamodb.put_df(df=album_artist_association_df, table_name='artist_album_association')
+    wr.dynamodb.put_df(df=track_artist_association_df, table_name='track_artists_association')
+    wr.dynamodb.put_df(df=track_album_association_df, table_name='track_albums_association')
 
 def extract_relevant_info(artist_id):
-    Session = sessionmaker(bind=engine)
 
-    # Create a session
-    session = Session()
+    dynamodb = boto3.client('dynamodb')
 
-    ## Query tracks with related artists
-    tracks = session.query(Tracks).filter(Tracks.artists.any(artist_id=artist_id)).all()
+    tracks_table_name = 'tracks'
+    track_artists_association_table_name = 'track_artists_association'
+    track_albums_association_table_name = 'track_albums_association'
+    artists_table_name = 'artists'
+    albums_table_name = 'albums'
 
-    # Create a DataFrame with track information and associated artists' names
-    df = pd.DataFrame([
-        {'track_id': track.track_id,
-        'track_name': track.track_name,
-        'track_number': track.track_number,
-        'album_name': track.albums[0].album_name,
-        'artist_names': ', '.join([artist.name for artist in track.artists]),
-        'key' : track.key,
-        'duration_ms' : track.duration_ms,
-        'instrumentalness': track.instrumentalness,
-        'acousticness': track.acousticness,
-        'danceability' : track.danceability,
-        'energy' : track.energy,
-        'liveness': track.liveness,
-        'speechiness': track.speechiness,
-        'valence' : track.valence,
-        'loudness' : track.loudness,
-        'tempo': track.tempo,
-        'time_signature': track.time_signature
-        } 
-        for track in tracks
-    ])
+    # Query track IDs associated with the artist from track_artists_association table
+    print("Querying track_artists_association")
+    response = dynamodb.query(
+        TableName=track_artists_association_table_name,
+        KeyConditionExpression='artist_id = :artist_id',
+        ExpressionAttributeValues={':artist_id': {'S': artist_id}}
+    )
+    
+    # Extract track IDs from the response
+    track_ids = [item['track_id']['S'] for item in response['Items']]
 
-    # Print the DataFrame
+    df = []
+
+    # Iterate over each track ID to fetch additional information
+    print("Querying Tracks for loop")
+    for track_id in track_ids:
+        # Query track details from DynamoDB
+        track_response = dynamodb.get_item(
+            TableName=tracks_table_name,
+            Key={'track_id': {'S': track_id}}
+        )
+        track_item = track_response['Item']
+
+        # Query associated album details from track_albums_association table
+        response_album = dynamodb.query(
+            TableName=track_albums_association_table_name,
+            KeyConditionExpression='track_id = :track_id',
+            ExpressionAttributeValues={':track_id': {'S': track_id}}
+        )
+
+        # Extract the album_id from the response
+        album_id = response_album['Items'][0]['album_id']['S']
+
+        # Query associated album details from the albums table
+        album_response = dynamodb.get_item(
+            TableName=albums_table_name,
+            Key={'album_id': {'S': album_id}}
+        )
+        album_item = album_response['Item']
+
+        df.append({
+            'track_id': track_item['track_id']['S'],
+            'track_name': track_item['track_name']['S'],
+            'track_number': int(track_item['track_number']['N']),
+            'album_name': album_item['album_name']['S'],
+            'artist_names': artist_id,  # Assuming artist ID is used here
+            'key': int(track_item['key']['N']),
+            'duration_ms': int(track_item['duration_ms']['N']),
+            'instrumentalness': float(track_item['instrumentalness']['N']),
+            'acousticness': float(track_item['acousticness']['N']),
+            'danceability': float(track_item['danceability']['N']),
+            'energy': float(track_item['energy']['N']),
+            'liveness': float(track_item['liveness']['N']),
+            'speechiness': float(track_item['speechiness']['N']),
+            'valence': float(track_item['valence']['N']),
+            'loudness': float(track_item['loudness']['N']),
+            'tempo': float(track_item['tempo']['N']),
+            'time_signature': int(track_item['time_signature']['N'])
+        })
+
+    df = pd.DataFrame(df)
+
     return df
 
 
@@ -188,30 +237,3 @@ def search_view(artist_name):
         return "No such artist exists!"
 
          
-                    
-# print(search_view('David Archuleta'))
-
-# # take a look
-# print(tables)
-
-# print("Artists:")
-# # take a look at the new table
-# sql="""
-# SELECT * FROM "artists"
-# """
-# df_back = pd.read_sql_query(sql, engine)
-# print(df_back)
-
-# print("Albums:")
-# sql="""
-# SELECT * FROM "albums"
-# """
-# df_back = pd.read_sql_query(sql, engine)
-# print(df_back)
-
-# print("Tracks:")    
-# sql="""
-# SELECT * FROM "tracks"
-# """
-# df_back = pd.read_sql_query(sql, engine)
-# print(df_back)

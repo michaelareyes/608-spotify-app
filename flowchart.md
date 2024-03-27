@@ -71,10 +71,11 @@ This also retrieves User-related information
 graph TD;
     main_py[main.py] -->|Redirects to /login| login[Flask: /login]
     login -->|Redirects to Spotify login page| AUTH_URL[Spotify Authorization URL]
-    AUTH_URL --> |Redirects to /streamlit| streamlit
-    streamlit --> |Fetches user information| Spotify_API[Spotify API]
-    Spotify_API --> |Returns information| streamlit
-    streamlit -->|Redirects to Streamlit code| streamlit_variables_py[streamlit_variables.py]
+    AUTH_URL --> |"<i>[Amazon API Gateway]</i>" <br>Calls /user_data</br| AWS_Lambda[AWS Lambda]
+    AWS_Lambda --> |Fetches user information| Spotify_API[Spotify API]
+    Spotify_API --> |Returns information| AWS_Lambda
+    AWS_Lambda --> |Transforms response| streamlit_flask[Flask: /streamlit]
+    streamlit_flask -->|Redirects to Streamlit code| streamlit_variables_py[streamlit_variables.py]
     streamlit_variables_py --> |Displays visualization| Streamlit_UI[Streamlit UI]
 ```
 
@@ -82,8 +83,9 @@ graph TD;
 # Retrieval of Artist/Album/Track Information
 
 ```mermaid
-graph TD;
-    Streamlit_UI --> |User queries an Artist| spotify_db_py
+graph TB;
+    Streamlit_UI --> |User queries an Artist| API[Amazon API Gateway]
+    API --> |Calls /search| spotify_db_py
     CheckArtist -->|No| spotify_api_py[spotify_api.py]
     spotify_api_py -->|Interacts with Spotify API| Spotify_API[Spotify API]
 

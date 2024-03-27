@@ -83,20 +83,30 @@ graph TD;
 # Retrieval of Artist/Album/Track Information
 
 ```mermaid
+
 graph TB;
-    Streamlit_UI --> |User queries an Artist| API[Amazon API Gateway]
-    API --> |Calls /search| spotify_db_py
-    CheckArtist -->|No| spotify_api_py[spotify_api.py]
-    spotify_api_py -->|Interacts with Spotify API| Spotify_API[Spotify API]
-
-    spotify_db_py[spotify_db.py] -->|Check if Artist in DB| CheckArtist{Is Artist in DB?}
-    
-    CheckArtist -->|Yes| RetrieveInfo[Retrieve information from DB]
-    RetrieveInfo -->engine
-    engine --> streamlit_variables.py
-
     streamlit_variables.py -->|Displays visualizations| Streamlit_UI[Streamlit UI]
+    engine --> streamlit_variables.py
     
-    Spotify_API -->|Fetches relevant information & stores in DB| engine[Database]
+    subgraph AWS_Lambda["<i>AWS Lambda</i>"]
+        direction TB
+        API --> |Calls /search| spotify_db_py
+        spotify_db_py[spotify_db.py] -->|Check if Artist in DB| CheckArtist{Is Artist in DB?}
+        CheckArtist -->|No| spotify_api_py[spotify_api.py]
+        spotify_api_py -->|Interacts with Spotify API| Spotify_API[Spotify API]
+        CheckArtist -->|Yes| RetrieveInfo[Retrieve information from DB]
+        RetrieveInfo -->engine
+        Spotify_API -->|Fetches relevant information & stores in DB| engine[(Database)]
+    end
+
+    subgraph streamlit["User Interface"]
+        
+        Streamlit_UI ----> |User queries an Artist| API[Amazon API Gateway]
+        
+        
+    end
+
+    
+
 
 ```

@@ -71,12 +71,22 @@ This also retrieves User-related information
 graph TD;
     main_py[main.py] -->|Redirects to /login| login[Flask: /login]
     login -->|Redirects to Spotify login page| AUTH_URL[Spotify Authorization URL]
-    AUTH_URL --> |"<i>[Amazon API Gateway]</i>" <br>Calls /user_data</br| AWS_Lambda[AWS Lambda]
-    AWS_Lambda --> |Fetches user information| Spotify_API[Spotify API]
-    Spotify_API --> |Returns information| AWS_Lambda
-    AWS_Lambda --> |Transforms response| streamlit_flask[Flask: /streamlit]
+    AUTH_URL ---> |Redirects to /streamlit| streamlit_flask[Flask: /streamlit]
+    streamlit_flask --> |Calls /user_data| API[Amazon API Gateway: <br> /user_data]
+
+    API --> |Transforms response| streamlit_flask 
+
     streamlit_flask -->|Redirects to Streamlit code| streamlit_variables_py[streamlit_variables.py]
     streamlit_variables_py --> |Displays visualization| Streamlit_UI[Streamlit UI]
+
+    AUTH_URL ~~~ streamlit_flask
+
+    subgraph AWSLambda["<i>AWS Lambda</i>"]
+        
+        API --> |Fetches user information| Spotify_API[Spotify API]
+        Spotify_API --> |Returns information| API
+        
+    end
 ```
 
 
@@ -87,6 +97,8 @@ graph TD;
 graph TB;
     streamlit_variables.py -->|Displays visualizations| Streamlit_UI[Streamlit UI]
     engine --> streamlit_variables.py
+
+    streamlit ~~~ AWS_Lambda
     
     subgraph AWS_Lambda["<i>AWS Lambda</i>"]
         direction TB
@@ -96,7 +108,7 @@ graph TB;
         spotify_api_py -->|Interacts with Spotify API| Spotify_API[Spotify API]
         CheckArtist -->|Yes| RetrieveInfo[Retrieve information from DB]
         RetrieveInfo -->engine
-        Spotify_API -->|Fetches relevant information & stores in DB| engine[(Database)]
+        Spotify_API -->|Fetches relevant information & stores in DB| engine[(DynamoDB)]
     end
 
     subgraph streamlit["User Interface"]
@@ -105,8 +117,4 @@ graph TB;
         
         
     end
-
-    
-
-
 ```

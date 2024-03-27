@@ -5,14 +5,18 @@ from datetime import datetime, timedelta
 from flask import Flask, redirect, request, jsonify, session
 from collections import Counter
 import itertools
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = 'f42fa124d2627f97aad0adbdc1ef089300087684ecd2a990'
+app.secret_key = os.getenv("FLASK_SECRET_KEY")
 
-PUBLIC_IP = '44.218.178.62'
+PUBLIC_IP = os.getenv("PUBLIC_IP")
 
-CLIENT_ID = 'e83d0b4c2eab4287adbd9830d18ac151'
-CLIENT_SECRET = 'e3e62bcb12ed41bebadf1951985076b8'
+CLIENT_ID = os.getenv('CLIENT_ID')
+CLIENT_SECRET = os.getenv('CLIENT_SECRET')
 REDIRECT_URI = f'http://{PUBLIC_IP}:5001/callback'
 
 AUTH_URL = 'https://accounts.spotify.com/authorize'

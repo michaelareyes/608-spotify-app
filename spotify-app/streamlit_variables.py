@@ -145,7 +145,7 @@ def tracklist_trend(df):
 
 # Function to render page 2 content
 def render_page_2():
-    
+    st.title(f"{st.session_state.name_artist}'s Discography")
     Name_of_Artist = st.text_input("Search for Another Artist...")
     button_clicked = st.button("Search")
     if button_clicked:

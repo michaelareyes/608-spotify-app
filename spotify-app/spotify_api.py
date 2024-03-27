@@ -8,8 +8,8 @@ import itertools
 
 class SpotifyAPI:
     def __init__(self):
-        self.client_id = 'e83d0b4c2eab4287adbd9830d18ac151'
-        self.client_secret = 'e3e62bcb12ed41bebadf1951985076b8'
+        self.client_id = os.environ['CLIENT_ID']
+        self.client_secret = os.environ['CLIENT_SECRET']
         self.base_url = "https://api.spotify.com/v1/"
     
     def get_token(self):
@@ -111,10 +111,7 @@ class SpotifyAPI:
 
         return discography_with_features
     
-    def get_user_data(self):
-
-        token = self.get_token()
-        headers = self.get_auth_header(token)
+    def get_user_data(self, headers):
 
         user_data = {}
 
@@ -171,7 +168,4 @@ class SpotifyAPI:
                             'response_error': tracks_response.text}
             return error_message
         
-        user_data = json.dumps(user_data)
-
         return user_data
-

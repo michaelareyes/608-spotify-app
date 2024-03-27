@@ -193,7 +193,7 @@ def extract_relevant_info(artist_id):
             'track_name': track_item['track_name']['S'],
             'track_number': int(track_item['track_number']['N']),
             'album_name': album_item['album_name']['S'],
-            'artist_names': artist_id,  # Assuming artist ID is used here
+            # 'artist_names': artist_id,  # Assuming artist ID is used here
             'key': int(track_item['key']['N']),
             'duration_ms': int(track_item['duration_ms']['N']),
             'instrumentalness': float(track_item['instrumentalness']['N']),

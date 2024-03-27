@@ -21,8 +21,6 @@ def lambda_handler(event, context):
     artist_name = params["artist"]
 
     df = search_view(artist_name)
-    
-    print(type(df))
 
     ## For Radar Chart
     desired_columns = ['instrumentalness', 'acousticness', 'danceability',
@@ -39,8 +37,7 @@ def lambda_handler(event, context):
     
     # Convert avg_dict to JSON
     avg_dict_json = json.dumps(avg_dict)
-
-    # Now you can include avg_dict_json in your response
+    
     response = {
         "df": df.to_json(),
         "radar_chart": avg_dict_json

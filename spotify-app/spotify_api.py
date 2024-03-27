@@ -3,6 +3,8 @@ import requests
 import json
 import requests
 import base64
+from collections import Counter
+import itertools
 
 class SpotifyAPI:
     def __init__(self):
@@ -108,4 +110,68 @@ class SpotifyAPI:
             })
 
         return discography_with_features
+    
+    def get_user_data(self):
+
+        token = self.get_token()
+        headers = self.get_auth_header(token)
+
+        user_data = {}
+
+        # GET USERNAME
+        response = requests.get(self.base_url + "me", headers=headers)
+        if response.status_code == 200:
+            user = response.json()
+            user_data["username"] = user['display_name']
+        
+        else:
+            error_message = {'message': 'Failed to get user\'s data ', 
+                            'status_code': response.status_code,
+                            'response_error': response.text}
+            return error_message
+
+        # GET TOP 10 ARTISTS
+
+        top_artist_url = self.base_url + "me/top/artists?limit=10"
+        artist_response = requests.get(top_artist_url, headers=headers)
+
+        if artist_response.status_code == 200:
+            top_artists = artist_response.json()
+            names = [item['name'] for item in top_artists['items']]
+            artist_image_urls = [item['images'][2]["url"] for item in top_artists['items']] # get the one for 160px
+            genres = [item['genres'] for item in top_artists['items']]
+
+            user_data["top_artists"] = names
+            user_data["artist_url"] = artist_image_urls
+            genres_count = Counter(list(itertools.chain(*genres)))
+            user_data["top_genres"] = [genre for genre, _ in genres_count.most_common(10)]
+        
+        else:
+            error_message = {'message': 'Failed to get user\'s top artists ', 
+                            'status_code': artist_response.status_code,
+                            'response_error': artist_response.text}
+            return error_message
+        
+        # GET TOP 10 TRACKS
+        
+        top_tracks_url = self.base_url + "me/top/tracks?limit=10"
+        tracks_response = requests.get(top_tracks_url, headers=headers)
+
+        if tracks_response.status_code == 200:
+            top_tracks = tracks_response.json()
+            track_names = [item['name'] for item in top_tracks['items']]
+            track_image_urls = [item["album"]['images'][2]["url"]for item in top_tracks['items']] # get the one for 160px
+            
+            user_data["top_tracks"] = track_names
+            user_data["track_url"] = track_image_urls
+        
+        else:
+            error_message = {'message': 'Failed to get user\'s top tracks ', 
+                            'status_code': tracks_response.status_code,
+                            'response_error': tracks_response.text}
+            return error_message
+        
+        user_data = json.dumps(user_data)
+
+        return user_data
 

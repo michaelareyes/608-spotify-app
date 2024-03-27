@@ -6,6 +6,7 @@ import pandas as pd
 import awswrangler as wr
 from decimal import Decimal
 from spotify_db import search_view
+from spotify_api import SpotifyAPI
 import json
 
 # Initialize the DynamoDB client
@@ -37,10 +38,26 @@ def lambda_handler(event, context):
     
     # Convert avg_dict to JSON
     avg_dict_json = json.dumps(avg_dict)
-    
+
     response = {
         "df": df.to_json(),
         "radar_chart": avg_dict_json
     }
 
     return json.dumps(response)
+    
+  if event["rawPath"] == "/user_data":
+    params = event["queryStringParameters"]
+    auth = params['Authorization']
+    
+    headers = {
+      "Authorization": auth
+    }
+
+    spotify_api = SpotifyAPI()
+    
+    resp = spotify_api.get_user_data(headers)
+    
+    print(resp)
+    
+    return json.dumps(resp)

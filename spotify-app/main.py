@@ -189,66 +189,23 @@ def streamlit_ui():
         "Authorization": f"Bearer {session['access_token']}"
     }
 
-    user_data = {}
+    get_data_url = 'https://9qw0fmwpv2.execute-api.us-east-1.amazonaws.com/user_data'
 
-    # GET USERNAME
-    response = requests.get(API_BASE_URL + "me", headers=headers)
+    response = requests.get(get_data_url, params=headers)
+
     if response.status_code == 200:
-        user = response.json()
-        user_data["username"] = user['display_name']
+    
+        user_data = json.dumps(response.json())
+
+        return redirect(f'http://{PUBLIC_IP}:8501?user={user_data}')
     
     else:
-        error_message = {'message': 'Failed to get user\'s data ', 
-                         'status_code': response.status_code,
-                         'response_error': response.text}
-        return error_message
 
-    # GET TOP 10 ARTISTS
-
-    top_artist_url = API_BASE_URL + "me/top/artists?limit=10"
-    artist_response = requests.get(top_artist_url, headers=headers)
-
-    if artist_response.status_code == 200:
-        top_artists = artist_response.json()
-        names = [item['name'] for item in top_artists['items']]
-        artist_image_urls = [item['images'][2]["url"] for item in top_artists['items']] # get the one for 160px
-        genres = [item['genres'] for item in top_artists['items']]
-
-        user_data["top_artists"] = names
-        user_data["artist_url"] = artist_image_urls
-        genres_count = Counter(list(itertools.chain(*genres)))
-        user_data["top_genres"] = [genre for genre, _ in genres_count.most_common(10)]
-    
-    else:
-        error_message = {'message': 'Failed to get user\'s top artists ', 
-                         'status_code': artist_response.status_code,
-                         'response_error': artist_response.text}
-        return error_message
-    
-    # GET TOP 10 TRACKS
-    
-    top_tracks_url = API_BASE_URL + "me/top/tracks?limit=10"
-    tracks_response = requests.get(top_tracks_url, headers=headers)
-
-    if tracks_response.status_code == 200:
-        top_tracks = tracks_response.json()
-        track_names = [item['name'] for item in top_tracks['items']]
-        track_image_urls = [item["album"]['images'][2]["url"]for item in top_tracks['items']] # get the one for 160px
-        
-        user_data["top_tracks"] = track_names
-        user_data["track_url"] = track_image_urls
-    
-    else:
-        error_message = {'message': 'Failed to get user\'s top tracks ', 
-                         'status_code': tracks_response.status_code,
-                         'response_error': tracks_response.text}
-        return error_message
-    
-    user_data = json.dumps(user_data)
-    print(user_data)
-
-
-    return redirect(f'http://{PUBLIC_IP}:8501?user={user_data}')  # Replace with your Streamlit UI URL
+        return {
+            'Error': 'Error in streamlit_ui()',
+            'status_code': response.status_code,
+            'message': response.text
+        }
         
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)

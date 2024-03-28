@@ -36,17 +36,6 @@ def check_artist_existence(artist_id):
     else:
         return False
 
-async def create_artist_entry(artist_df):
-    await wr.dynamodb.put_df(df=artist_df, table_name='artists')
-
-async def create_album_entries(album_df):
-    await wr.dynamodb.put_df(df=album_df, table_name='albums')
-
-async def create_track_entries(track_df):
-    await wr.dynamodb.put_df(df=track_df, table_name='tracks')
-
-async def create_association_entries(association_df, table_name):
-    await wr.dynamodb.put_df(df=association_df, table_name=table_name)
 
 async def create_entries(artist_data, artist_id):
     spotify_api = SpotifyAPI()
@@ -152,20 +141,17 @@ async def create_entries(artist_data, artist_id):
         task_end = time.time() - task_time
         print(f"spotify_db: Time taken to run tasks concurrently: {task_end} seconds")
 
-    async def my_async_function():
-        insert_start = time.time()
-        await asyncio.gather(
-            wr.dynamodb.put_df(df=pd.DataFrame(album_data_list), table_name='albums'),
-            wr.dynamodb.put_df(df=pd.DataFrame(track_data_list), table_name='tracks'),
-            wr.dynamodb.put_df(df=pd.DataFrame(album_artist_association_data), table_name='artist_album_association'),
-            wr.dynamodb.put_df(df=pd.DataFrame(track_artist_association_data), table_name='track_artists_association'),
-            wr.dynamodb.put_df(df=pd.DataFrame(track_album_association_data), table_name='track_albums_association')
-        )
-        insert_end = time.time() - insert_start
-        print(f"spotify_db: Time taken to insert to DB: {insert_end} seconds")
 
-    # Call the async function
-    asyncio.get_event_loop().run_until_complete(my_async_function)
+    insert_start = time.time()
+
+    wr.dynamodb.put_df(df=pd.DataFrame(album_data_list), table_name='albums')
+    wr.dynamodb.put_df(df=pd.DataFrame(track_data_list), table_name='tracks')
+    wr.dynamodb.put_df(df=pd.DataFrame(album_artist_association_data), table_name='artist_album_association')
+    wr.dynamodb.put_df(df=pd.DataFrame(track_artist_association_data), table_name='track_artists_association')
+    wr.dynamodb.put_df(df=pd.DataFrame(track_album_association_data), table_name='track_albums_association')
+
+    insert_end = time.time() - insert_start
+    print(f"spotify_db: Time taken to insert to DB: {insert_end} seconds")
 
     return
 

@@ -3,6 +3,7 @@ import plotly.express as px
 import pandas as pd
 import json
 import requests
+import asyncio
 
 def local_css(file_name):
     with open(file_name) as f:
@@ -53,6 +54,12 @@ def render_page_1():
     if 'user' in query_params:
     # Extract user-related data from query parameters
         user_data = json.loads(query_params['user'])
+
+        print(user_data)
+
+        user_data = json.loads(user_data)
+
+        print(type(user_data))
 
         display_name = user_data['username']
         st.title(f"Welcome, {display_name}! :wave:")
@@ -144,7 +151,7 @@ def tracklist_trend(df):
         st.write("No data available for selected albums.")
 
 # Function to render page 2 content
-def render_page_2():
+async def render_page_2():
     st.title(f"{st.session_state.name_artist}'s Discography")
     Name_of_Artist = st.text_input("Search for Another Artist...")
     button_clicked = st.button("Search")
@@ -191,16 +198,21 @@ def render_page_2():
         st.session_state.currentPage = "page1"
         st.rerun()
 
+def main():
+    # Initialize session state
+    if 'currentPage' not in st.session_state:
+        st.session_state.currentPage = "page1"
 
-# Initialize session state
-if 'currentPage' not in st.session_state:
-    st.session_state.currentPage = "page1"
+    # Render content based on current page
+    if st.session_state.currentPage == "page1":
+        render_page_1()
+    elif st.session_state.currentPage == "page2":
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(render_page_2())
 
-# Render content based on current page
-if st.session_state.currentPage == "page1":
-    render_page_1()
-elif st.session_state.currentPage == "page2":
-    render_page_2()
+if __name__ == "__main__":
+    main()
 
 
     

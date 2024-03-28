@@ -30,7 +30,7 @@ def check_artist_existence(artist_id):
     else:
         return False
 
-def create_entries(artist_data, artist_id):
+async def create_entries(artist_data, artist_id):
     spotify_api = SpotifyAPI()
 
     artist_dict = {
@@ -48,7 +48,7 @@ def create_entries(artist_data, artist_id):
     wr.dynamodb.put_df(df=artist_df, table_name='artists')
     
     # Create Albums DB
-    discography_with_features = spotify_api.get_discography_with_features(artist_id)
+    discography_with_features = await spotify_api.get_discography_with_features(artist_id)
 
     album_data_list = []
     track_data_list = []
@@ -213,10 +213,10 @@ def extract_relevant_info(artist_id):
     return df
 
 
-def search_view(artist_name):
+async def search_view(artist_name):
     
     spotify_api = SpotifyAPI() 
-    artist_data = spotify_api.search_for_artist(artist_name)
+    artist_data = await spotify_api.search_for_artist(artist_name)
 
     if artist_data:
         artist_id = artist_data['id']
@@ -228,7 +228,7 @@ def search_view(artist_name):
 
             # Artist not in DB, create df
             print("spotify_db: Artist not in DB")
-            create_entries(artist_data, artist_id)
+            await create_entries(artist_data, artist_id)
         
         print("spotify_db: Extracting relevant information..")
         return extract_relevant_info(artist_id)

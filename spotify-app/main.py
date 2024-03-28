@@ -245,6 +245,7 @@ def streamlit_ui():
         return error_message
     
     user_data = json.dumps(user_data)
+    user_data = urllib.parse.quote(user_data)
     print(user_data)
 
 

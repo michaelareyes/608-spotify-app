@@ -6,6 +6,7 @@ import json
 import base64
 from collections import Counter
 import itertools
+import time
 
 class SpotifyAPI:
     def __init__(self):
@@ -40,6 +41,7 @@ class SpotifyAPI:
         return {"Authorization": "Bearer " + token}
 
     async def search_for_artist(self, artist_name):
+        start_time = time.time()
         url = self.base_url + "search"
         headers = await self.get_auth_header()
         query = f"?q={artist_name}&type=artist&limit=1"
@@ -52,6 +54,8 @@ class SpotifyAPI:
                 if not artists:
                     print("No artist with this name exists...")
                     return None
+                search_time = time.time() - start_time  # Calculate elapsed time
+                print(f"spotify_api: Time taken to search for artist: {search_time} seconds")
                 return artists[0]
 
     async def get_track_features_batch(self, track_ids):
@@ -75,16 +79,18 @@ class SpotifyAPI:
                 track_features = await self.get_track_features_batch(track_ids)
                 tracks_info = []
                 for track, features in zip(json_result.get("items", []), track_features):
-                    tracks_info.append({
+                    tracks_dict = {
                         "track_name": track["name"],
                         "track_id": track["id"],
                         "track_number": track["track_number"],
-                        "artists": track["artists"],
-                        "features": features
-                    })
+                        "artists": track["artists"]
+                    }
+                    tracks_dict.update(features)
+                    tracks_info.append(tracks_dict)
                 return tracks_info
 
     async def get_discography_with_features(self, artist_id):
+        start_time = time.time()
         url = self.base_url + f"artists/{artist_id}/albums"
         headers = await self.get_auth_header()
         
@@ -111,10 +117,13 @@ class SpotifyAPI:
                         "artists": artists,
                         "tracks": album_tracks_with_features
                     })
-                    
+                get_discography_time = time.time() - start_time  # Calculate elapsed time
+                print(f"spotify_api: Time taken to get discography's features: {get_discography_time} seconds")
                 return discography_with_features
 
     def get_user_data(self, headers):
+
+        start_time = time.time()
     
         user_data = {}
 
@@ -131,7 +140,7 @@ class SpotifyAPI:
             return error_message
 
         # GET TOP 10 ARTISTS
-
+        start_artist_time = time.time()
         top_artist_url = self.base_url + "me/top/artists?limit=10"
         artist_response = requests.get(top_artist_url, headers=headers)
 
@@ -145,6 +154,9 @@ class SpotifyAPI:
             user_data["artist_url"] = artist_image_urls
             genres_count = Counter(list(itertools.chain(*genres)))
             user_data["top_genres"] = [genre for genre, _ in genres_count.most_common(10)]
+
+            artist_time = time.time() - start_artist_time
+            print(f"spotify_api: Time taken for obtaining top artists: {artist_time} seconds")
         
         else:
             error_message = {'message': 'Failed to get user\'s top artists ', 
@@ -153,7 +165,7 @@ class SpotifyAPI:
             return error_message
         
         # GET TOP 10 TRACKS
-        
+        start_track_time = time.time()
         top_tracks_url = self.base_url + "me/top/tracks?limit=10"
         tracks_response = requests.get(top_tracks_url, headers=headers)
 
@@ -164,6 +176,9 @@ class SpotifyAPI:
             
             user_data["top_tracks"] = track_names
             user_data["track_url"] = track_image_urls
+
+            tracks_time = time.time() - start_track_time
+            print(f"spotify_api: Time taken for obtaining top tracks: {tracks_time} seconds")
         
         else:
             error_message = {'message': 'Failed to get user\'s top tracks ', 
@@ -171,6 +186,8 @@ class SpotifyAPI:
                             'response_error': tracks_response.text}
             return error_message
         
+        end_time = time.time() - start_time
+        print(f"spotify_api: Time taken to get ALL OF user's data: {end_time} seconds")
         return user_data
 
 async def main():

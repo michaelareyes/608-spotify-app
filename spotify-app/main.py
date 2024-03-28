@@ -7,6 +7,7 @@ from collections import Counter
 import itertools
 import os
 from dotenv import load_dotenv
+import time
 
 load_dotenv()
 
@@ -193,6 +194,8 @@ def streamlit_ui():
         "Authorization": f"Bearer {session['access_token']}"
     }
 
+    start_time = time.time()
+
     get_data_url = 'https://9qw0fmwpv2.execute-api.us-east-1.amazonaws.com/user_data'
 
     response = requests.get(get_data_url, params=headers)
@@ -200,6 +203,10 @@ def streamlit_ui():
     if response.status_code == 200:
     
         user_data = json.dumps(response.json())
+
+        user_end_time = time.time() - start_time
+
+        print(f"Flask Spotify: Time taken for obtaining user info: {user_end_time} seconds")
 
         return redirect(f'http://{PUBLIC_IP}:8501?user={user_data}')
     

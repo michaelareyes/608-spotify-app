@@ -4,6 +4,7 @@ import pandas as pd
 import json
 import requests
 import asyncio
+import time
 
 def local_css(file_name):
     with open(file_name) as f:
@@ -52,6 +53,7 @@ def query_artist():
 def render_page_1():
     
     if 'user' in query_params:
+        start_time = time.time()
     # Extract user-related data from query parameters
         user_data = json.loads(query_params['user'])
 
@@ -101,6 +103,9 @@ def render_page_1():
             st.header('Genres', anchor=False)
             for genre in user_data['top_genres'][:10]:
                 st.subheader(f'*{genre}*', anchor=False)
+
+        user_end_time = time.time() - start_time
+        print(f"Time taken to load User related information: {user_end_time} seconds")
     
 
 base_url = 'https://2aldcvzbbj.execute-api.us-east-1.amazonaws.com/'
@@ -152,6 +157,7 @@ def tracklist_trend(df):
 
 # Function to render page 2 content
 async def render_page_2():
+    
     st.title(f"{st.session_state.name_artist}'s Discography")
     Name_of_Artist = st.text_input("Search for Another Artist...")
     button_clicked = st.button("Search")
@@ -163,8 +169,13 @@ async def render_page_2():
         Name_of_Artist = st.session_state.name_artist
         params = {'artist': Name_of_Artist}
 
+        artist_time = time.time()
+
         # Make an HTTP GET request to the API endpoint for SEARCH
         response = requests.get(base_url + "search", params=params)
+
+        artist_end_time = time.time() - artist_time
+        print(f"Time taken for search_view function: {artist_end_time} seconds")
 
         if response.status_code == 200:
             
@@ -178,12 +189,18 @@ async def render_page_2():
 
             # Display the radar chart
             st.write("Radar Chart")
+            radar_start = time.time()
             radar_chart(radar_chart_df)
+            radar_end_time = time.time() - radar_start
+            print(f"Time taken for radar chart: {radar_end_time} seconds")
 
             ## Tracklist Trend
 
             st.write("Tracklist Trend")
+            tracklist_start = time.time()
             tracklist_trend(df)
+            tracklist_end_time = time.time() - tracklist_start
+            print(f"Time taken for tracklist trend chart: {tracklist_end_time} seconds")
             
         else:
             return {

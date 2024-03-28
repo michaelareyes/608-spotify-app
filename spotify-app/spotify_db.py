@@ -6,6 +6,7 @@ import awswrangler as wr
 from decimal import Decimal
 import asyncio
 import aiohttp
+import time
 
 
 def check_artist_existence(artist_id):
@@ -22,9 +23,12 @@ def check_artist_existence(artist_id):
             ':artist_id': {'S': artist_id} 
         }
     }
-
+    start_time = time.time()  # Record start time
     # Perform the query operation
     response = dynamodb.query(**query_params)
+
+    artist_time = time.time() - start_time  # Calculate elapsed time
+    print(f"spotify_db.py: Time taken for checking artist's existence: {artist_time} seconds")
 
     # Check if any items were returned
     if 'Items' in response and len(response['Items']) > 0:
@@ -32,10 +36,40 @@ def check_artist_existence(artist_id):
     else:
         return False
 
+async def create_artist_entry(artist_df):
+    await wr.dynamodb.put_df(df=artist_df, table_name='artists')
 
-async def create_entries(artist_data, artist_id, spotify_api):
-    # Create Albums DB
+async def create_album_entries(album_df):
+    await wr.dynamodb.put_df(df=album_df, table_name='albums')
+
+async def create_track_entries(track_df):
+    await wr.dynamodb.put_df(df=track_df, table_name='tracks')
+
+async def create_association_entries(association_df, table_name):
+    await wr.dynamodb.put_df(df=association_df, table_name=table_name)
+
+async def create_entries(artist_data, artist_id):
+    spotify_api = SpotifyAPI()
+    
+    artist_dict = {
+        'artist_id': artist_id,
+        'name': artist_data['name'],
+        'followers': artist_data['followers']['total'],
+        'popularity': artist_data['popularity'],
+        'genres': json.dumps(artist_data['genres'])
+    }
+
+    # Append to Artists table
+    artist_df = pd.DataFrame(artist_dict, index=[0])
+
+    wr.dynamodb.put_df(df=artist_df, table_name='artists')
+
+    start_time = time.time()
+
     discography_with_features = await spotify_api.get_discography_with_features(artist_id)
+
+    spotify_track_features_time = time.time() - start_time
+    print(f"spotify_db: Time taken to get track features from Spotify: {spotify_track_features_time} seconds")
 
     album_data_list = []
     track_data_list = []
@@ -75,15 +109,15 @@ async def create_entries(artist_data, artist_id, spotify_api):
             'track_number': track_info['track_number'],
             'key': track_info.get('key', None),
             'duration_ms': track_info.get('duration_ms', None),
-            'instrumentalness': track_info.get('instrumentalness', None),
-            'acousticness': track_info.get('acousticness', None),
-            'danceability': track_info.get('danceability', None),
-            'energy': track_info.get('energy', None),
-            'liveness': track_info.get('liveness', None),
-            'speechiness': track_info.get('speechiness', None),
-            'valence': track_info.get('valence', None),
-            'loudness': track_info.get('loudness', None),
-            'tempo': track_info.get('tempo', None),
+            'instrumentalness': Decimal(str(track_info['instrumentalness'])) if track_info.get('instrumentalness') is not None else None,
+            'acousticness': Decimal(str(track_info['acousticness'])) if track_info.get('acousticness') is not None else None,
+            'danceability': Decimal(str(track_info['danceability'])) if track_info.get('danceability') is not None else None,
+            'energy': Decimal(str(track_info['energy'])) if track_info.get('energy') is not None else None,
+            'liveness': Decimal(str(track_info['liveness'])) if track_info.get('liveness') is not None else None,
+            'speechiness': Decimal(str(track_info['speechiness'])) if track_info.get('speechiness') is not None else None,
+            'valence': Decimal(str(track_info['valence'])) if track_info.get('valence') is not None else None,
+            'loudness': Decimal(str(track_info['loudness'])) if track_info.get('loudness') is not None else None,
+            'tempo': Decimal(str(track_info['tempo'])) if track_info.get('tempo') is not None else None,
             'time_signature': track_info.get('time_signature', None)
         }
         track_data_list.append(track_dict)
@@ -99,23 +133,45 @@ async def create_entries(artist_data, artist_id, spotify_api):
     # Run tasks concurrently
     async with aiohttp.ClientSession() as session:
         tasks = []
+        tracks_time = 0
+
+        album_start = time.time()
         for album_info in discography_with_features:
+            tracks_start = time.time()
             tasks.append(process_album(album_info))
             for track_info in album_info['tracks']:
                 tasks.append(process_track(album_info, track_info))
-        await asyncio.gather(*tasks)
+                tracks_end = time.time() - tracks_start
+                tracks_time += tracks_end
+        album_end = time.time() - album_start
+        print(f"spotify_db: Time taken for looping through albums: {album_end} seconds")
+        print(f"spotify_db: Time taken for looping through tracks: {tracks_time} seconds")
 
-    # Insert into DynamoDB
-    await asyncio.gather(
-        wr.dynamodb.put_df(df=pd.DataFrame(album_data_list), table_name='albums'),
-        wr.dynamodb.put_df(df=pd.DataFrame(track_data_list), table_name='tracks'),
-        wr.dynamodb.put_df(df=pd.DataFrame(album_artist_association_data), table_name='artist_album_association'),
-        wr.dynamodb.put_df(df=pd.DataFrame(track_artist_association_data), table_name='track_artists_association'),
-        wr.dynamodb.put_df(df=pd.DataFrame(track_album_association_data), table_name='track_albums_association')
-    )
+        task_time = time.time()
+        await asyncio.gather(*tasks)
+        task_end = time.time() - task_time
+        print(f"spotify_db: Time taken to run tasks concurrently: {task_end} seconds")
+
+    async def my_async_function():
+        insert_start = time.time()
+        await asyncio.gather(
+            wr.dynamodb.put_df(df=pd.DataFrame(album_data_list), table_name='albums'),
+            wr.dynamodb.put_df(df=pd.DataFrame(track_data_list), table_name='tracks'),
+            wr.dynamodb.put_df(df=pd.DataFrame(album_artist_association_data), table_name='artist_album_association'),
+            wr.dynamodb.put_df(df=pd.DataFrame(track_artist_association_data), table_name='track_artists_association'),
+            wr.dynamodb.put_df(df=pd.DataFrame(track_album_association_data), table_name='track_albums_association')
+        )
+        insert_end = time.time() - insert_start
+        print(f"spotify_db: Time taken to insert to DB: {insert_end} seconds")
+
+    # Call the async function
+    asyncio.get_event_loop().run_until_complete(my_async_function)
+
+    return
 
 
 def extract_relevant_info(artist_id):
+    start_time = time.time()
     dynamodb = boto3.client('dynamodb')
 
     tracks_table_name = 'tracks'
@@ -170,6 +226,8 @@ def extract_relevant_info(artist_id):
         })
 
     df = pd.DataFrame(df)
+    extract_relevant_info_time = time.time() - start_time
+    print(f"spotify_db: Time taken for extracting relevant information: {extract_relevant_info_time} seconds")
     return df
 
 def get_album_id_for_track(track_id, dynamodb, track_albums_association_table_name):
@@ -188,9 +246,15 @@ def get_album_details(album_id, dynamodb, albums_table_name):
     return response['Item']
 
 async def search_view(artist_name):
+
+    start_time = time.time()
     
     spotify_api = SpotifyAPI() 
     artist_data = await spotify_api.search_for_artist(artist_name)
+
+    artist_time = time.time() - start_time
+
+    print(f"spotify_db: Time taken to search Spotify API: {artist_time} seconds")
 
     if artist_data:
         artist_id = artist_data['id']

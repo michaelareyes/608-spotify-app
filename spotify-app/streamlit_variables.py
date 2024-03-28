@@ -57,7 +57,7 @@ def render_page_1():
 
         print(user_data)
 
-        user_data = json.loads(user_data)
+        #user_data = json.loads(user_data)
 
         print(type(user_data))
 

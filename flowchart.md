@@ -95,6 +95,6 @@ graph TD;
 
     streamlit_variables.py -->|Displays visualizations| Streamlit_UI[Streamlit UI]
     
-    Spotify_API -->|Fetches relevant information & stores in DB| engine[Database]
+    Spotify_API -->|Fetches relevant information & stores in DB| engine[(RDS)]
 
 ```

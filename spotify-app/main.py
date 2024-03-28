@@ -244,7 +244,10 @@ def streamlit_ui():
                          'response_error': tracks_response.text}
         return error_message
     
+    
     user_data = json.dumps(user_data)
+    user_data = urllib.parse.quote(user_data)
+
     print(user_data)
 
 

@@ -3,6 +3,7 @@ import plotly.express as px
 import pandas as pd
 from spotify_db import search_view
 import json
+import urllib.parse
 
 def local_css(file_name):
     with open(file_name) as f:
@@ -52,7 +53,14 @@ def render_page_1():
     
     if 'user' in query_params:
     # Extract user-related data from query parameters
-        user_data = json.loads(query_params['user'])
+        
+        user_data_decoded = urllib.parse.unquote(query_params['user'])
+
+        print(type(query_params['user']))
+
+        print(query_params['user'])
+
+        user_data = json.loads(user_data_decoded)
 
         display_name = user_data['username']
         st.title(f"Welcome, {display_name}! :wave:")

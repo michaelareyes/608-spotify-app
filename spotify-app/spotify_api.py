@@ -3,6 +3,7 @@ import aiohttp
 import os
 import base64
 import json
+import time
 
 class SpotifyAPI:
     def __init__(self):
@@ -37,6 +38,7 @@ class SpotifyAPI:
         return {"Authorization": "Bearer " + token}
 
     async def search_for_artist(self, artist_name):
+        start_time = time.time()
         url = self.base_url + "search"
         headers = await self.get_auth_header()
         query = f"?q={artist_name}&type=artist&limit=1"
@@ -49,6 +51,8 @@ class SpotifyAPI:
                 if not artists:
                     print("No artist with this name exists...")
                     return None
+                search_time = time.time() - start_time  # Calculate elapsed time
+                print(f"spotify_api: Time taken to search for artist: {search_time} seconds")
                 return artists[0]
 
     async def get_track_features_batch(self, track_ids):
@@ -82,6 +86,7 @@ class SpotifyAPI:
                 return tracks_info
 
     async def get_discography_with_features(self, artist_id):
+        start_time = time.time()
         url = self.base_url + f"artists/{artist_id}/albums"
         headers = await self.get_auth_header()
         
@@ -108,7 +113,8 @@ class SpotifyAPI:
                         "artists": artists,
                         "tracks": album_tracks_with_features
                     })
-                    
+                get_discography_time = time.time() - start_time  # Calculate elapsed time
+                print(f"spotify_api: Time taken to get discography's features: {get_discography_time} seconds")
                 return discography_with_features
 
 async def main():

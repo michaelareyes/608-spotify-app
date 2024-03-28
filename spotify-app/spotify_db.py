@@ -6,6 +6,9 @@ from spotify_api import SpotifyAPI
 import json
 from create_artist_table import Tracks, Albums, Artists, artist_album_association, track_artists_association, track_albums_association
 from sqlalchemy.orm import sessionmaker
+import time
+import aiohttp
+import asyncio
 
 # write out connection details
 conf ={
@@ -31,6 +34,7 @@ session = Session()
 
 
 def check_artist_existence(artist_id):
+    start_time = time.time()  # Record start time
     query = f"""
 
     SELECT EXISTS (
@@ -42,6 +46,9 @@ def check_artist_existence(artist_id):
     """
 
     query_boolean = pd.read_sql_query(query, engine, params=(artist_id,))
+
+    artist_time = time.time() - start_time  # Calculate elapsed time
+    print(f"spotify_db.py: Time taken for checking artist's existence: {artist_time} seconds")
 
     return query_boolean.iloc[0, 0]
 
@@ -62,7 +69,10 @@ async def create_entries(artist_data, artist_id):
         session.bulk_insert_mappings(Artists, [artist_dict])
 
         # Create Albums DB
+        start_time = time.time()
         discography_with_features = await spotify_api.get_discography_with_features(artist_id)
+        spotify_track_features_time = time.time() - start_time
+        print(f"spotify_db: Time taken to get track features from Spotify: {spotify_track_features_time} seconds")
 
         album_data_list = []
         track_data_list = []
@@ -79,7 +89,7 @@ async def create_entries(artist_data, artist_id):
             'album_id': []
         }
 
-        for album_info in discography_with_features:
+        async def process_album(album_info):
             album_data = {
                 'album_id': album_info['album_id'],
                 'album_type': album_info['album_type'],
@@ -93,40 +103,61 @@ async def create_entries(artist_data, artist_id):
             ## Album-Artist association
             album_artist_association_data['artist_id'].append(artist_id)
             album_artist_association_data['album_id'].append(album_info['album_id'])
+        
+        async def process_track(album_info, track_info):
+            track_data = {
+                'track_id': track_info['track_id'],
+                'track_name': track_info['track_name'],
+                'track_number': track_info['track_number'],
+                'key' : track_info['features'].get('key', None),
+                'duration_ms' : track_info['features'].get('duration_ms', None),
+                'instrumentalness':track_info['features'].get('instrumentalness', None),
+                'acousticness': track_info['features'].get('acousticness', None),
+                'danceability' : track_info['features'].get('danceability', None),
+                'energy' : track_info['features'].get('energy', None),
+                'liveness':track_info['features'].get('liveness', None),
+                'speechiness':track_info['features'].get('speechiness', None),
+                'valence' : track_info['features'].get('valence', None),
+                'loudness' : track_info['features'].get('loudness', None),
+                'tempo':track_info['features'].get('tempo', None),
+                'time_signature':track_info['features'].get('time_signature', None)
+            }
+            track_data_list.append(track_data)
+
+            ## Track-Artist Association
+            track_artist_association_data['artist_id'].append(artist_id)
+            track_artist_association_data['track_id'].append(track_info['track_id'])
             
-            for track_info in album_info['tracks']:
 
-                track_data = {
-                    'track_id': track_info['track_id'],
-                    'track_name': track_info['track_name'],
-                    'track_number': track_info['track_number'],
-                    'key' : track_info['features'].get('key', None),
-                    'duration_ms' : track_info['features'].get('duration_ms', None),
-                    'instrumentalness':track_info['features'].get('instrumentalness', None),
-                    'acousticness': track_info['features'].get('acousticness', None),
-                    'danceability' : track_info['features'].get('danceability', None),
-                    'energy' : track_info['features'].get('energy', None),
-                    'liveness':track_info['features'].get('liveness', None),
-                    'speechiness':track_info['features'].get('speechiness', None),
-                    'valence' : track_info['features'].get('valence', None),
-                    'loudness' : track_info['features'].get('loudness', None),
-                    'tempo':track_info['features'].get('tempo', None),
-                    'time_signature':track_info['features'].get('time_signature', None)
-                }
-                track_data_list.append(track_data)
+            ## Track-Album Association
+            track_album_association_data['album_id'].append(album_info['album_id'])
+            track_album_association_data['track_id'].append(track_info['track_id'])
 
-                ## Track-Artist Association
-                track_artist_association_data['artist_id'].append(artist_id)
-                track_artist_association_data['track_id'].append(track_info['track_id'])
-                
+        # Run tasks concurrently
+        async with aiohttp.ClientSession() as session_async:
+            tasks = []
+            tracks_time = 0
 
-                ## Track-Album Association
-                track_album_association_data['album_id'].append(album_info['album_id'])
-                track_album_association_data['track_id'].append(track_info['track_id'])
+            album_start = time.time()
+            for album_info in discography_with_features:
+                tracks_start = time.time()
+                tasks.append(process_album(album_info))
+                for track_info in album_info['tracks']:
+                    tasks.append(process_track(album_info, track_info))
+                    tracks_end = time.time() - tracks_start
+                    tracks_time += tracks_end
+            album_end = time.time() - album_start
+            print(f"spotify_db: Time taken for looping through albums: {album_end} seconds")
+            print(f"spotify_db: Time taken for looping through tracks: {tracks_time} seconds")
+
+            task_time = time.time()
+            await asyncio.gather(*tasks)
+            task_end = time.time() - task_time
+            print(f"spotify_db: Time taken to run tasks concurrently: {task_end} seconds")
             
 
         # Bulk insertion for Albums and Tracks
-
+        insert_start = time.time()
         session.bulk_insert_mappings(Albums, album_data_list)
         session.bulk_insert_mappings(Tracks, track_data_list)
 
@@ -143,6 +174,8 @@ async def create_entries(artist_data, artist_id):
         album_association_df = pd.DataFrame(track_album_association_data)
         album_association_df.to_sql('track_albums_association', engine, index=False, if_exists='append')
 
+        insert_end = time.time() - insert_start
+        print(f"spotify_db: Time taken to insert to DB: {insert_end} seconds")
 
     except Exception as e:
         # Rollback the transaction if an error occurs
@@ -155,6 +188,7 @@ async def create_entries(artist_data, artist_id):
 
 
 def extract_relevant_info(artist_id):
+    start_time = time.time()
     Session = sessionmaker(bind=engine)
 
     # Create a session
@@ -185,7 +219,8 @@ def extract_relevant_info(artist_id):
         } 
         for track in tracks
     ])
-
+    extract_relevant_info_time = time.time() - start_time
+    print(f"spotify_db: Time taken for extracting relevant information: {extract_relevant_info_time} seconds")
     # Print the DataFrame
     return df
 

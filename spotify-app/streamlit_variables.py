@@ -5,6 +5,7 @@ from spotify_db import search_view
 import json
 import asyncio
 import urllib.parse
+import time
 
 def local_css(file_name):
     with open(file_name) as f:
@@ -54,6 +55,7 @@ def render_page_1():
     
     if 'user' in query_params:
     # Extract user-related data from query parameters
+        start_time = time.time()
         user_data_decoded = urllib.parse.unquote(query_params['user'])
 
         print(type(query_params['user']))
@@ -102,6 +104,9 @@ def render_page_1():
             st.header('Genres', anchor=False)
             for genre in user_data['top_genres'][:10]:
                 st.subheader(f'*{genre}*', anchor=False)
+
+        user_end_time = time.time() - start_time
+        print(f"Time taken to load User related information: {user_end_time} seconds")
     
 
 # Function to render page 2 content
@@ -114,8 +119,11 @@ async def render_page_2():
         st.rerun()
 
     if 'name_artist' in st.session_state and st.session_state.name_artist is not None:
+        artist_time = time.time()
         Name_of_Artist = st.session_state.name_artist
         df = await search_view(Name_of_Artist)
+        artist_end_time = time.time() - artist_time
+        print(f"streamlit_variables: Time taken for search_view function: {artist_end_time} seconds")
 
         # Select only the desired columns
         desired_columns = ['instrumentalness', 'acousticness', 'danceability',
@@ -141,7 +149,10 @@ async def render_page_2():
 
         # Display the radar chart
         st.write("Radar Chart")
+        radar_start = time.time()
         radar_chart(df_selected)
+        radar_end_time = time.time() - radar_start
+        print(f"Time taken for radar chart: {radar_end_time} seconds")
 
         ## Tracklist Trend
 
@@ -177,7 +188,10 @@ async def render_page_2():
                 st.write("No data available for selected albums.")
 
         st.write("Tracklist Trend")
+        tracklist_start = time.time()
         tracklist_trend(df)
+        tracklist_end_time = time.time() - tracklist_start
+        print(f"Time taken for tracklist trend chart: {tracklist_end_time} seconds")
     else:
         st.warning("Please enter an artist name.")
 

@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from flask import Flask, redirect, request, jsonify, session
 from collections import Counter
 import itertools
+import time
 
 app = Flask(__name__)
 app.secret_key = 'f42fa124d2627f97aad0adbdc1ef089300087684ecd2a990'
@@ -192,6 +193,7 @@ def streamlit_ui():
     user_data = {}
 
     # GET USERNAME
+    start_time = time.time()
     response = requests.get(API_BASE_URL + "me", headers=headers)
     if response.status_code == 200:
         user = response.json()
@@ -247,6 +249,10 @@ def streamlit_ui():
     user_data = json.dumps(user_data)
     user_data = urllib.parse.quote(user_data)
     print(user_data)
+    
+    user_end_time = time.time() - start_time
+
+    print(f"Flask Spotify: Time taken for obtaining user info: {user_end_time} seconds")
 
 
     return redirect(f'http://{PUBLIC_IP}:8501?user={user_data}')  # Replace with your Streamlit UI URL

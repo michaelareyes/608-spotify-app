@@ -79,13 +79,17 @@ To set up the Spotify Data application, follow the instructions provided in the 
     - 5001: This port hosts the Flask application.
     - 8501: Streamlit's port.
 
-5. **Modify .env file**
+5. **Modify Amazon Lambda's Configurations**
+   
+   - Increase time out (1 minute) and memory (1000MB)
+
+6. **Modify .env file**
 
     Update the .env file with your IP address, Spotify's Client ID, and Secret Key. These credentials are necessary for authenticating and accessing Spotify's API. Ensure that the file contains the correct values for these variables to enable seamless interaction with Spotify's services.
 
     Remember to configure the environment variables in AWS Lambda as well.
    
-6. **In the EC2 Instance:**
+7. **In the EC2 Instance:**
    - Install all required packages using `pip install -r requirements.txt`.
    - Run the Flask application using `python main.py` or `python3 main.py`.
    - In another terminal, run the Streamlit application using `streamlit run streamlit_variables.py`. If you get an error regarding `OSError: [Errno 28] inotify watch limit reached`, try running the app using `streamlit run streamlit_variables.py --server.fileWatcherType none` instead.

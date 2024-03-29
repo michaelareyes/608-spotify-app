@@ -108,7 +108,7 @@ def render_page_1():
         print(f"Time taken to load User related information: {user_end_time} seconds")
     
 
-base_url = 'https://2aldcvzbbj.execute-api.us-east-1.amazonaws.com/'
+base_url = 'https://cvnedk3h71.execute-api.us-east-1.amazonaws.com/'
 
 def radar_chart(avg_df):
 

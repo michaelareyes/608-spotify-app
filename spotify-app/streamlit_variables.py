@@ -106,6 +106,29 @@ def render_page_1():
 
         user_end_time = time.time() - start_time
         print(f"Time taken to load User related information: {user_end_time} seconds")
+
+        st.title("Recommendations")
+
+        recommendations_url = "https://dto10a2tg5.execute-api.us-east-1.amazonaws.com/get_recommendations"
+
+        # Make an HTTP GET request to the API endpoint for SEARCH
+        recommendations_response = requests.get(recommendations_url)
+
+        if recommendations_response.status_code == 200:
+            
+            recommendations = recommendations_response.json()
+            print(recommendations)
+            recommendations = pd.DataFrame(recommendations)
+
+            st.table(recommendations)
+
+        else:
+            return {
+                'Error': 'Error in getting recommendations',
+                'status_code': recommendations_response.status_code,
+                'message': recommendations_response.text
+            }
+
     
 
 base_url = 'https://9e49g24h2h.execute-api.us-east-1.amazonaws.com/'

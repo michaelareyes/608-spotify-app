@@ -10,6 +10,8 @@ from spotify_api import SpotifyAPI
 import json
 import asyncio
 
+global_headers = None
+
 async def wait_search_view(artist_name):
 
     # Await the asynchronous function call
@@ -40,8 +42,18 @@ async def wait_search_view(artist_name):
 
     return json.dumps(response)
 
+def wait_recommendations(headers):
+    
+    spotify_api = SpotifyAPI()
+
+    resp = spotify_api.get_recommendations(headers)
+
+    return resp
+
 def lambda_handler(event, context):
     print(event)
+
+    global global_headers
     
     if event["rawPath"] == "/search":
         params = event["queryStringParameters"]
@@ -55,9 +67,12 @@ def lambda_handler(event, context):
 
         params = event["queryStringParameters"]
         auth = params['Authorization']
+
         headers = {
             "Authorization": auth
         }
+
+        global_headers = headers
 
         spotify_api = SpotifyAPI()
 
@@ -68,3 +83,15 @@ def lambda_handler(event, context):
         print(resp)
 
         return json.dumps(resp)
+    
+    elif event["rawPath"] == "/get_recommendations":
+        print("lambda_function: Getting Recommendations")
+
+        print(global_headers)
+
+        resp = wait_recommendations(global_headers)
+
+        print(resp)
+
+        return resp
+

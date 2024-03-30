@@ -196,7 +196,7 @@ def streamlit_ui():
 
     start_time = time.time()
 
-    get_data_url = 'https://nqg6t1naaa.execute-api.us-east-1.amazonaws.com/user_data'
+    get_data_url = 'https://37z3tbz3z4.execute-api.us-east-1.amazonaws.com/user_data'
 
     response = requests.get(get_data_url, params=headers)
 

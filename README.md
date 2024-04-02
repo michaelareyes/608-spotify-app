@@ -57,16 +57,9 @@ To set up the Spotify Data application, follow the instructions provided in the 
 
 2. **Create DynamoDB Tables in AWS**
    
-   Set up DynamoDB tables for `Artists`, `Albums`, `Tracks`, `artist_album_association`, `track_album_association`, and `track_artists_association`.
+   Set up DynamoDB table for `spotify`.
 
-   - **Artists Table**: Stores information about artists.
-   - **Albums Table**: Stores information about albums.
-   - **Tracks Table**: Stores information about tracks.
-   - **artist_album_association Table**: Represents a many-to-many relationship between artists and albums. It associates each artist with the albums they have contributed to.
-   - **track_album_association Table**: Represents a many-to-many relationship between tracks and albums. It associates each track with the albums it belongs to.
-   - **track_artists_association Table**: Represents a many-to-many relationship between tracks and artists. It associates each track with the artists who have contributed to it.
-
-   These association tables allow for efficient querying and retrieval of data, enabling the application to handle complex relationships between artists, albums, and tracks effectively. For detailed information on the attributes in each table, please refer to the Entity-Relationship Diagram (ERD) provided in `flowchart.md`.
+   - Let `primary_key = artist_id` and `sort_key = track_id`.
 
 3. **Create Amazon API Gateway endpoints for:**
 
@@ -108,12 +101,6 @@ To run both files simultaneously, we recommend using a tool like tmux to manage 
 5. You can switch between tmux panes using the designated tmux shortcuts.
 
 By following these steps, you can run both the Flask and Streamlit applications simultaneously within the same tmux session, making it easier to manage and monitor the application's execution.
-
-
-## Things to Note
-
-1. If modifying database structure (ie. adding/removing declared features in a table), uncomment lines 113 and 110 in `create_artist_table.py`, save and run the file to wipe out everything and create new empty tables. (There's possibly better ways to do this and definitely not best practice in real world scenarios but since we're just starting to build our DB and do not have much data yet, I think this is the simplest way to do it right now)
-2. Might need to change the `PUBLIC_IP` variable to your own instance's public ip address in `main.py` line 28.
 
 ## Usage
 

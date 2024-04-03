@@ -202,7 +202,7 @@ class SpotifyAPI:
             id = [item['id'] for item in top_artists['items']]
 
             # Get recommendations based off of these top 5 artists that the user is CURRENTLY listening to
-            payload = {'seed_artists': id}
+            payload = {'seed_artists': id, 'limit':8}
             recommendations_response = requests.get(url, headers=headers, params=payload)
 
             if recommendations_response.status_code == 200:

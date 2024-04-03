@@ -24,6 +24,53 @@ query_params = st.query_params.to_dict()
 def display_image(url):
     return f'<img src="{url}" width="100">'
 
+def format_artist_names(artist_list):
+    return ', '.join(artist_list)
+
+def display_recommendations(df):
+    images = df["image_url"]
+    df["artists"] = df["artists"].apply(format_artist_names)
+    artist_names = df["artists"]
+    track_names = df["track_name"]
+    album_names = df["album"]
+
+    image_css = """
+        <style>
+            .center-align {
+                text-align: center;
+            }
+            .left-align {
+                text-align: left;
+            }
+            .image-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .image-container img {
+                width: 200px;
+                height: auto;
+            }
+        </style>
+    """
+
+    st.markdown(image_css, unsafe_allow_html=True)
+
+    for i in range(0, len(images), 4):
+        col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
+        for j, col in enumerate([col1, col3, col5, col7]):
+            index = i + j
+            if index < len(images):
+                with col:
+                    st.markdown(image_css, unsafe_allow_html=True)
+                    st.image(images[index], width=200)
+                    st.markdown(f'<div style="text-align: center;"><b>{track_names[index]}</b></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div style="text-align: center;"><i>Artist: {artist_names[index]}</i></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div style="text-align: center;"><i>Album: {album_names[index]}</i></div>', unsafe_allow_html=True)
+                    # st.write(f"Artist: {artist_names[index]}", **{'class': 'left-align'})
+                    # st.write(f"Track: {track_names[index]}", **{'class': 'center-align', 'style': 'font-weight: bold;'})
+                    # st.write(f"Album: {album_names[index]}", **{'class': 'left-align'})
+
 def query_artist():
 
     # my_expander = st.expander("**Search and Discover an Artist's Discography Features**", expanded=True)
@@ -78,10 +125,10 @@ def render_page_1():
             
             for i in range(len(user_data['top_artists'])):
 
-                c1, c2= st.columns((1,5))
+                c1, c2= st.columns((1,4))
 
                 with c1:
-                    st.image(user_data['artist_url'][i], width = 75)
+                    st.image(user_data['artist_url'][i], width = 100)
 
                 with c2:
                     st.subheader(f'*{user_data["top_artists"][i]}*', anchor=False)
@@ -91,10 +138,10 @@ def render_page_1():
             
             for i in range(len(user_data['top_tracks'])):
 
-                c1, c2= st.columns((1,5))
+                c1, c2= st.columns((1,4))
 
                 with c1:
-                    st.image(user_data['track_url'][i], width = 75)
+                    st.image(user_data['track_url'][i], width = 100)
 
                 with c2:
                     st.subheader(f'*{user_data["top_tracks"][i]}*', anchor=False)
@@ -118,10 +165,11 @@ def render_page_1():
             
             recommendations = recommendations_response.json()
             print(recommendations)
+
             recommendations = pd.DataFrame(recommendations)
 
-            st.table(recommendations)
-
+            display_recommendations(recommendations)
+            
         else:
             return {
                 'Error': 'Error in getting recommendations',

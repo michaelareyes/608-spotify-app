@@ -67,9 +67,6 @@ def display_recommendations(df):
                     st.markdown(f'<div style="text-align: center;"><b>{track_names[index]}</b></div>', unsafe_allow_html=True)
                     st.markdown(f'<div style="text-align: center;"><i>Artist: {artist_names[index]}</i></div>', unsafe_allow_html=True)
                     st.markdown(f'<div style="text-align: center;"><i>Album: {album_names[index]}</i></div>', unsafe_allow_html=True)
-                    # st.write(f"Artist: {artist_names[index]}", **{'class': 'left-align'})
-                    # st.write(f"Track: {track_names[index]}", **{'class': 'center-align', 'style': 'font-weight: bold;'})
-                    # st.write(f"Album: {album_names[index]}", **{'class': 'left-align'})
 
 def query_artist():
 
@@ -156,28 +153,12 @@ def render_page_1():
 
         st.title("Recommendations")
 
-        recommendations_url = "https://dto10a2tg5.execute-api.us-east-1.amazonaws.com/get_recommendations"
+        recommendations = user_data['recommendations']
+        print("recommendations:", recommendations)
 
-        # Make an HTTP GET request to the API endpoint for SEARCH
-        recommendations_response = requests.get(recommendations_url)
+        recommendations = pd.DataFrame(recommendations)
 
-        if recommendations_response.status_code == 200:
-            
-            recommendations = recommendations_response.json()
-            print(recommendations)
-
-            recommendations = pd.DataFrame(recommendations)
-
-            display_recommendations(recommendations)
-            
-        else:
-            return {
-                'Error': 'Error in getting recommendations',
-                'status_code': recommendations_response.status_code,
-                'message': recommendations_response.text
-            }
-
-    
+        display_recommendations(recommendations)
 
 base_url = 'https://9e49g24h2h.execute-api.us-east-1.amazonaws.com/'
 

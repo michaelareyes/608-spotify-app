@@ -2,6 +2,7 @@ import streamlit as st
 import plotly.express as px
 import pandas as pd
 from spotify_db import search_view
+from spotify_api import SpotifyAPI
 import json
 import asyncio
 import urllib.parse
@@ -24,6 +25,50 @@ query_params = st.query_params.to_dict()
 
 def display_image(url):
     return f'<img src="{url}" width="100">'
+
+def format_artist_names(artist_list):
+    return ', '.join(artist_list)
+
+def display_recommendations(df):
+    images = df["image_url"]
+    df["artists"] = df["artists"].apply(format_artist_names)
+    artist_names = df["artists"]
+    track_names = df["track_name"]
+    album_names = df["album"]
+
+    image_css = """
+        <style>
+            .center-align {
+                text-align: center;
+            }
+            .left-align {
+                text-align: left;
+            }
+            .image-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .image-container img {
+                width: 200px;
+                height: auto;
+            }
+        </style>
+    """
+
+    st.markdown(image_css, unsafe_allow_html=True)
+
+    for i in range(0, len(images), 4):
+        col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
+        for j, col in enumerate([col1, col3, col5, col7]):
+            index = i + j
+            if index < len(images):
+                with col:
+                    st.markdown(image_css, unsafe_allow_html=True)
+                    st.image(images[index], width=200)
+                    st.markdown(f'<div style="text-align: center;"><b>{track_names[index]}</b></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div style="text-align: center;"><i>Artist: {artist_names[index]}</i></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div style="text-align: center;"><i>Album: {album_names[index]}</i></div>', unsafe_allow_html=True)
 
 def query_artist():
 
@@ -107,6 +152,15 @@ def render_page_1():
 
         user_end_time = time.time() - start_time
         print(f"Time taken to load User related information: {user_end_time} seconds")
+
+        st.title("Recommendations")
+
+        recommendations = user_data['recommendations']
+        print(recommendations)
+
+        recommendations = pd.DataFrame(recommendations)
+
+        display_recommendations(recommendations)
     
 
 # Function to render page 2 content

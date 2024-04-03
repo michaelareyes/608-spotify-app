@@ -176,6 +176,50 @@ def refresh_token():
             
             return error_message
         
+def get_recommendations(headers):
+    url = API_BASE_URL + "recommendations"
+    top_artist_url = API_BASE_URL + "me/top/artists?time_range=short_term&limit=5"
+
+    # Get the seeds for the top 5 artists
+    artist_response = requests.get(top_artist_url, headers=headers)
+
+    if artist_response.status_code == 200:
+        top_artists = artist_response.json()
+        id = [item['id'] for item in top_artists['items']]
+
+        # Get recommendations based off of these top 5 artists that the user is CURRENTLY listening to
+        payload = {'seed_artists': id, 'limit':8}
+        recommendations_response = requests.get(url, headers=headers, params=payload)
+
+        if recommendations_response.status_code == 200:
+            recommendations_response = recommendations_response.json()
+            resp = []
+            for track in recommendations_response["tracks"]:
+                track_info = {
+                    "track_name": track["name"],
+                    "image_url": track["album"]["images"][1]["url"],
+                    "artists": [artist["name"] for artist in track["artists"]],
+                    "album": track["album"]["name"]
+                }
+
+                resp.append(track_info)
+            print(resp)
+            # return json.dumps(resp)
+
+            return resp
+
+        else:
+            error_message = {'message': 'Failed to get recommendations', 
+                            'status_code': recommendations_response.status_code,
+                            'response_error': recommendations_response.text}
+            return error_message
+
+    else:
+        error_message = {'message': 'Failed to get user\'s top artists ', 
+                        'status_code': artist_response.status_code,
+                        'response_error': artist_response.text}
+        return error_message
+        
 @app.route('/streamlit')
 def streamlit_ui():
     # Logic to determine whether user is authenticated
@@ -245,6 +289,11 @@ def streamlit_ui():
                          'status_code': tracks_response.status_code,
                          'response_error': tracks_response.text}
         return error_message
+    
+    # GET RECOMMENDATIONS
+    recommendations = get_recommendations(headers)
+
+    user_data["recommendations"] = recommendations
     
     user_data = json.dumps(user_data)
     user_data = urllib.parse.quote(user_data)

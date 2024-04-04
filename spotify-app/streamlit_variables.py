@@ -5,6 +5,7 @@ import json
 import requests
 import asyncio
 import time
+import urllib.parse
 
 def local_css(file_name):
     with open(file_name) as f:
@@ -99,7 +100,13 @@ def render_page_1():
     if 'user' in query_params:
         start_time = time.time()
     # Extract user-related data from query parameters
-        user_data = json.loads(query_params['user'])
+        user_data_decoded = urllib.parse.unquote(query_params['user'])
+
+        print(type(query_params['user']))
+
+        print(query_params['user'])
+
+        user_data = json.loads(user_data_decoded)
 
         print(user_data)
 

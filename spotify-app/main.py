@@ -203,6 +203,7 @@ def streamlit_ui():
     if response.status_code == 200:
     
         user_data = json.dumps(response.json())
+        user_data = urllib.parse.quote(user_data)
 
         user_end_time = time.time() - start_time
 

@@ -247,7 +247,7 @@ async def render_page_2():
             # Streamlit Charts
 
             # Display the radar chart
-            st.write("Radar Chart")
+            st.title("Radar Chart")
             radar_start = time.time()
             radar_chart(radar_chart_df)
             radar_end_time = time.time() - radar_start
@@ -255,21 +255,25 @@ async def render_page_2():
 
             ## Tracklist Trend
 
-            st.write("Tracklist Trend")
+            st.title("Tracklist Trend")
             tracklist_start = time.time()
             tracklist_trend(df)
             tracklist_end_time = time.time() - tracklist_start
             print(f"Time taken for tracklist trend chart: {tracklist_end_time} seconds")
 
-            # Display top and lowest energetic tracks
-            st.write("Most Energetic Tracks:")
-            top_valence_tracks_df = df.sort_values('energy').head(3)
-            top_valence_track_names = top_valence_tracks_df['track_name'].tolist()
-            for i, track_name in enumerate(top_valence_track_names):
-                st.write(f"{i+1}. {track_name}")
+            ## Top Tracks by track_features
+
+            col1, col2, col3 = st.columns(3)
+
+            # Display top and lowest energetic tracks with album cover images
+            top_energy_tracks_df = df.sort_values('energy').head(3)
+            top_energy_track_names = top_energy_tracks_df['track_name'].tolist()
+
+            st.title("Most Energetic Tracks:")
+            for index, row in top_energy_tracks_df.iterrows():
+                st.image(row['images'], caption=row['track_name'], width=150)
 
             st.write(df)
-            st.write(data)
             
         else:
             return {

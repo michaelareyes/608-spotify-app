@@ -89,7 +89,7 @@ async def create_entries(artist_data, artist_id):
 
     if batch_requests:
         #dynamodb.batch_write_item(RequestItems={table_name: batch_requests})
-        batch_size = 100
+        batch_size = 25
         num_batches = (len(batch_requests) + batch_size - 1) // batch_size  # Calculate total number of batches
 
         for i in range(num_batches):

@@ -149,6 +149,7 @@ def extract_relevant_info(artist_id):
         acousticness = float(item['acousticness']['N'])
         time_signature = int(item['time_signature']['N'])
         liveness = float(item['liveness']['N'])
+        images = json.loads(item['images']['S'])[0]["url"]
 
         df.append({
             'track_id': track_id,
@@ -166,10 +167,13 @@ def extract_relevant_info(artist_id):
             'valence': valence,
             'loudness': loudness,
             'tempo': tempo,
-            'time_signature': time_signature
+            'time_signature': time_signature,
+            'images': images
         })
-
+    
     df = pd.DataFrame(df)
+    
+    print(df, "recommendations")
 
     extract_relevant_info_time = time.time() - start_time
     print(f"spotify_db: Time taken for extracting relevant information: {extract_relevant_info_time} seconds")

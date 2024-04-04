@@ -267,6 +267,9 @@ async def render_page_2():
             top_valence_track_names = top_valence_tracks_df['track_name'].tolist()
             for i, track_name in enumerate(top_valence_track_names):
                 st.write(f"{i+1}. {track_name}")
+
+            st.write(df)
+            st.write(data)
             
         else:
             return {

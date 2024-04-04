@@ -260,6 +260,13 @@ async def render_page_2():
             tracklist_trend(df)
             tracklist_end_time = time.time() - tracklist_start
             print(f"Time taken for tracklist trend chart: {tracklist_end_time} seconds")
+
+            # Display top and lowest energetic tracks
+            st.write("Most Energetic Tracks:")
+            top_valence_tracks_df = df.sort_values('energy').head(3)
+            top_valence_track_names = top_valence_tracks_df['track_name'].tolist()
+            for i, track_name in enumerate(top_valence_track_names):
+                st.write(f"{i+1}. {track_name}")
             
         else:
             return {

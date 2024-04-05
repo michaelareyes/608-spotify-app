@@ -69,12 +69,12 @@ erDiagram
 
     Spotify {
         string artist_id "PK"
-        string track_id "PK"
+        string track_id "SK"
         int followers ""
         int popularity ""
         JSON genres ""
         string name ""
-        string album_id "PK"
+        string album_id ""
         string album_type ""
         int total_tracks ""
         int track_number ""

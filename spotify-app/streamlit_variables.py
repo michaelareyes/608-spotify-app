@@ -5,6 +5,7 @@ import json
 import requests
 import asyncio
 import time
+import random
 import urllib.parse
 from spotify_api import SpotifyAPI
 from dotenv import load_dotenv
@@ -64,6 +65,17 @@ def display_recommendations(df):
                     st.markdown(f'<i class="text-center">Album: {album_names[index]}</i>', unsafe_allow_html=True)
                     st.markdown('</div>', unsafe_allow_html=True)
 
+# Define a list of titles
+titles = [
+    "I see you have great taste, {display_name}... :eye::lips::eye:",
+    "You've got an excellent ear for music, {display_name}! :headphones:",
+    "Looks like you're a music aficionado, {display_name}! :musical_note:",
+    # Add more titles as needed
+]
+
+# Function to get random title
+def get_random_title(display_name):
+    return random.choice(titles).format(display_name=display_name)
 
 def query_artist():
 
@@ -117,7 +129,7 @@ def render_page_1():
 
         query_artist()
         
-        st.title("Your Current Top:", anchor=False)
+        st.markdown("<h1 class='custom-heading-current-top'>Your Current Top:</h1>", unsafe_allow_html=True)
 
         col1, col2, col3 = st.columns(3)
 
@@ -156,7 +168,7 @@ def render_page_1():
         user_end_time = time.time() - start_time
         print(f"Time taken to load User related information: {user_end_time} seconds")
 
-        st.title("Recommendations")
+        st.markdown("<h1 class='custom-heading-recommendations'>Recommendations</h1>", unsafe_allow_html=True)
 
         recommendations = user_data['recommendations']
         print("recommendations:", recommendations)
@@ -224,7 +236,9 @@ async def render_page_2():
     if st.button("Go back to User Dashboard"):
         go_back_to_dashboard()
 
-    st.title("I see you have great taste, {display_name}... :eye::lips::eye:")
+    # Get a random title
+    random_title = get_random_title("user_data")
+    st.title(random_title)
 
     # Create a popover for the search functionality
     with st.popover("Search for another artist...", use_container_width=True):
@@ -256,8 +270,9 @@ async def render_page_2():
             radar_chart_df = pd.read_json(data["radar_chart"])
 
             # Display Artist name
-            st.markdown(f"<h1 style='text-align: center; font-size: 100px;'>{st.session_state.name_artist}'s Discography</h1>", unsafe_allow_html=True)
-            # Display Artist Profile Photo
+            st.markdown(f"<h1 class='custom-heading-artist'>{st.session_state.name_artist}'s Discography</h1>", unsafe_allow_html=True)
+            
+            # Display Artist Profile Photos
             col1, col2, col3 = st.columns(3)
             with col1:
                 st.image(df['images'][1])
@@ -270,9 +285,7 @@ async def render_page_2():
 
             ## Streamlit Charts
 
-            # Apply the custom style and display the heading
             st.markdown("<h1 class='custom-heading-track-features'>Track Features Analysis</h1>", unsafe_allow_html=True)
-
 
             with st.container(border=True):
                 col1, col2 = st.columns(2)

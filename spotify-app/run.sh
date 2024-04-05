@@ -1,9 +1,5 @@
 #!/bin/bash
 
-echo "Triggering the lambda function..."
-
-python3 spotify-app/lambda_function.py &
-
 # Print a message indicating the script is starting
 echo "Running the flask application..."
 

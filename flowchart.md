@@ -52,8 +52,7 @@ graph TB;
     end
 ```
 
-## Current ERD Diagram (actual variables subject to change)
-This is just what I have right now
+##  DynamoDB - Variables of Interest (1NF)
 
 ```mermaid
 
@@ -62,33 +61,19 @@ This is just what I have right now
   "themeCSS": [
     ".er.relationshipLabel { fill: black; }", 
     ".er.relationshipLabelBox { fill: white; }", 
-    "[id^=entity-Artist] .er.entityBox { fill: pink; }",
-    "[id^=entity-Album] .er.entityBox { fill: lightgreen;} ",
-    "[id^=entity-Track] .er.entityBox { fill: powderblue;} "
+    "[id^=entity-Spotify] .er.entityBox { fill: pink; }"
     ]
 }}%%
 erDiagram
-    Artist ||--|| artist_album_association:""
-    artist_album_association ||--|| Album: ""
+    Spotify 
 
-    Album ||--|| track_album_association: ""
-    track_album_association ||--|| Track: ""
-
-    Artist ||--|| track_artists_association: ""
-    track_artists_association ||--|| Track: ""
-
-    Artist {
+    Spotify {
         string artist_id "PK"
+        string track_id "PK"
         int followers ""
         int popularity ""
         JSON genres ""
         string name ""
-    }
-    artist_album_association {
-        string album_id "PK"
-        string artist_id "SK"
-    }
-    Album {
         string album_id "PK"
         string album_type ""
         int total_tracks ""
@@ -96,17 +81,6 @@ erDiagram
         JSON available_markets ""
         JSON images ""
         string album_name ""
-    }
-    track_album_association {
-        string track_id "PK"
-        string album_id "SK"
-    }
-    track_artists_association {
-        string artist_id "PK"
-        string track_id "SK"
-    }
-    Track {
-        string track_id "PK"
         int key ""
         int duration_ms ""
         decimal instrumentalness ""
@@ -121,6 +95,5 @@ erDiagram
         decimal time_signature ""
         string track_name ""
     }
-
     
 ```

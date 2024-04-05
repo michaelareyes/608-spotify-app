@@ -66,7 +66,7 @@ def display_recommendations(df):
                     st.markdown('</div>', unsafe_allow_html=True)
 
 # Define a list of titles
-titles = [
+titles_page_2 = [
     "Your music taste is on :rainbow[point], {display_name}! Keep grooving! :notes:",
     "Wow, {display_name}, your playlist is as :rainbow[eclectic] as it gets! :guitar:",
     "You're a music :rainbow[explorer], {display_name}! Let's dive into more tunes! :headphones:",
@@ -77,7 +77,7 @@ titles = [
     "Your playlist is a :rainbow[masterpiece], {display_name}! Let's add more colors to it! :art:",
     "Your music journey is :rainbow[legendary], {display_name}! Let's embark on new adventures! :rocket:",
     "You're a tune :rainbow[titan], {display_name}! Let's conquer new musical realms! :muscle:",
-    "You're the :rainbow[conductor] of your playlist, {display_name}! Let's orchestrate more tunes! :conductor:",
+    "You're the :rainbow[conductor] of your playlist, {display_name}! Let's orchestrate more tunes! :magic_wand:",
     "Your music vibes are :rainbow[contagious], {display_name}! Let's spread the rhythm! :boom:",
     "You're the :rainbow[DJ] of your life, {display_name}! Let's drop some beats! :dancer:",
     "Your playlist is a :rainbow[treasure trove], {display_name}! Let's discover more musical gold! :moneybag:",
@@ -85,7 +85,7 @@ titles = [
 
 # Function to get random title
 def get_random_title(display_name):
-    return random.choice(titles).format(display_name=display_name)
+    return random.choice(titles_page_2).format(display_name=display_name)
 
 def query_artist():
 
@@ -139,8 +139,21 @@ def render_page_1():
         st.session_state.username = display_name
 
         st.title(f"Welcome, :rainbow[{display_name}!] :wave:")
-
+        
         query_artist()
+        st.header("Your :rainbow[FAVES], at a glance...")
+
+        # Display Artist profile photos
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.image(user_data['artist_url'][1], use_column_width='always')
+            st.subheader(f'*{user_data["top_artists"][1]}*')
+        with col2:
+            st.image(user_data['artist_url'][2], use_column_width='always')
+            st.subheader(f'*{user_data["top_artists"][2]}*')
+        with col3:
+            st.image(user_data['artist_url'][3], use_column_width='always')
+            st.subheader(f'*{user_data["top_artists"][3]}*')
         
         st.markdown("<h1 class='custom-heading-current-top'>Your Current Top</h1>", unsafe_allow_html=True)
 
@@ -177,6 +190,7 @@ def render_page_1():
             st.header(':violin: Genres', anchor=False)
             for genre in user_data['top_genres'][:10]:
                 st.subheader(f'*{genre}*', anchor=False)
+
 
         user_end_time = time.time() - start_time
         print(f"Time taken to load User related information: {user_end_time} seconds")

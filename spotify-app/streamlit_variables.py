@@ -67,10 +67,20 @@ def display_recommendations(df):
 
 # Define a list of titles
 titles = [
-    "I see you have great taste, {display_name}... :eye::lips::eye:",
-    "You've got an excellent ear for music, {display_name}! :headphones:",
-    "Looks like you're a music aficionado, {display_name}! :musical_note:",
-    # Add more titles as needed
+    "Your music taste is on :rainbow[point], {display_name}! Keep grooving! :notes:",
+    "Wow, {display_name}, your playlist is as :rainbow[eclectic] as it gets! :guitar:",
+    "You're a music :rainbow[explorer], {display_name}! Let's dive into more tunes! :headphones:",
+    "Your music radar is :rainbow[unbeatable], {display_name}! Let's discover more hits! :sparkles:",
+    "You've got the :rainbow[vibe], {display_name}! Let's jam to some tunes! :drum:",
+    ":rainbow[Rock on], {display_name}! Your music collection rocks! :metal:",
+    "You're a melody :rainbow[maestro], {display_name}! Let's find more musical gems! :musical_note:",
+    "Your playlist is a :rainbow[masterpiece], {display_name}! Let's add more colors to it! :art:",
+    "Your music journey is :rainbow[legendary], {display_name}! Let's embark on new adventures! :rocket:",
+    "You're a tune :rainbow[titan], {display_name}! Let's conquer new musical realms! :muscle:",
+    "You're the :rainbow[conductor] of your playlist, {display_name}! Let's orchestrate more tunes! :conductor:",
+    "Your music vibes are :rainbow[contagious], {display_name}! Let's spread the rhythm! :boom:",
+    "You're the :rainbow[DJ] of your life, {display_name}! Let's drop some beats! :dancer:",
+    "Your playlist is a :rainbow[treasure trove], {display_name}! Let's discover more musical gold! :moneybag:",
 ]
 
 # Function to get random title
@@ -125,43 +135,46 @@ def render_page_1():
         print(type(user_data))
 
         display_name = user_data['username']
+
+        st.session_state.username = display_name
+
         st.title(f"Welcome, :rainbow[{display_name}!] :wave:")
 
         query_artist()
         
-        st.markdown("<h1 class='custom-heading-current-top'>Your Current Top:</h1>", unsafe_allow_html=True)
+        st.markdown("<h1 class='custom-heading-current-top'>Your Current Top</h1>", unsafe_allow_html=True)
 
         col1, col2, col3 = st.columns(3)
 
         with col1:
 
-            st.header('Artists', anchor=False)
+            st.header(':art: Artists', anchor=False)
             
             for i in range(len(user_data['top_artists'])):
 
                 c1, c2= st.columns((1,4))
 
                 with c1:
-                    st.image(user_data['artist_url'][i], width = 100)
+                    st.image(user_data['artist_url'][i], use_column_width='always')
 
                 with c2:
                     st.subheader(f'*{user_data["top_artists"][i]}*', anchor=False)
 
         with col2:
-            st.header('Tracks', anchor=False)
+            st.header(':cd: Tracks', anchor=False)
             
             for i in range(len(user_data['top_tracks'])):
 
                 c1, c2= st.columns((1,4))
 
                 with c1:
-                    st.image(user_data['track_url'][i], width = 100)
+                    st.image(user_data['track_url'][i], use_column_width='always')
 
                 with c2:
                     st.subheader(f'*{user_data["top_tracks"][i]}*', anchor=False)
         
         with col3:
-            st.header('Genres', anchor=False)
+            st.header(':violin: Genres', anchor=False)
             for genre in user_data['top_genres'][:10]:
                 st.subheader(f'*{genre}*', anchor=False)
 
@@ -237,7 +250,7 @@ async def render_page_2():
         go_back_to_dashboard()
 
     # Get a random title
-    random_title = get_random_title("user_data")
+    random_title = get_random_title(st.session_state.username)
     st.title(random_title)
 
     # Create a popover for the search functionality

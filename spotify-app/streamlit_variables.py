@@ -19,34 +19,13 @@ def local_css(file_name):
     with open(file_name) as f:
         st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
-def query_artist():
-    # Get the artist name from user input
-    artist_name = st.text_input("Enter the artist's name:")
-    
-    # Call the function to get the top tracks
-    if st.button("Get Top Tracks"):
-        # Initialize SpotifyAPI Instance
-        spotify_api = SpotifyAPI()
-        # Obtain access token
-        token = spotify_api.get_token()
-        # Get top tracks
-        top_tracks = spotify_api.get_artist_top_tracks(token, artist_name)
-        # Display top tracks
-        if top_tracks:
-            st.write("Top Tracks:")
-            for track in top_tracks:
-                st.write(track["name"])
-        else:
-            st.write("Failed to get top tracks.")
-
-
 # Function to create a section with a custom background color
 def custom_section(title, content):
     st.markdown(f"<div class='section'><h1>{title}</h1>{content}</div>", unsafe_allow_html=True)
         
 # Use the full page instead of a narrow central column
 st.set_page_config(
-    page_title="Spotify App"    ,
+    page_title="Spotify App",
     page_icon=":notes:",
     layout="wide"
 )
@@ -107,9 +86,11 @@ def query_artist():
     button_clicked = st.button("OK", key="stButtonVoice")
 
     if button_clicked:
+
         st.session_state.currentPage = "page2"
         st.session_state.button_clicked = True
         st.session_state.name_artist = Name_of_Artist
+
         st.rerun()
 
 def render_page_1():
@@ -231,8 +212,17 @@ def tracklist_trend(df):
     else:
         st.write("No data available for selected albums.")
 
+# Define a function to handle the button click event
+def go_back_to_dashboard():
+    st.session_state.currentPage = "page1"
+    st.experimental_rerun()  # Use `st.experimental_rerun()` instead of `st.rerun()`
+
 # Function to render page 2 content
 async def render_page_2():
+
+    # Place the button at the top of the page
+    if st.button("Go back to User Dashboard"):
+        go_back_to_dashboard()
 
     st.title("I see you have great taste, {display_name}... :eye::lips::eye:")
 
@@ -275,6 +265,8 @@ async def render_page_2():
                 st.image(df['images'][2])
             with col3:
                 st.image(df['images'][3])
+
+            st.dataframe(df)
 
             ## Streamlit Charts
 
@@ -400,9 +392,9 @@ async def render_page_2():
     else:
         st.warning("Please enter an artist name.")
 
-    if st.button("Go back to User Dashboard"):
-        st.session_state.currentPage = "page1"
-        st.rerun()
+    # Place the button at the bottom of the page
+    if st.button("Go back to User Dashboard "):
+        go_back_to_dashboard()
 
 def main():
     # Initialize session state

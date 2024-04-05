@@ -240,31 +240,13 @@ class SpotifyAPI:
         return user_data
     
     # GET ARTIST'S TOP TRACKS
-    def get_artist_top_tracks(token, artist_name_or_id):
-        # Check if the input is an artist name or ID
-        if artist_name_or_id.isdigit():
-            artist_id = artist_name_or_id
-        else:
-            # Search for the artist to get their ID
-            artist_info = search_for_artist(token, artist_name_or_id)
-            if not artist_info:
-                print("Artist not found.")
-                return None
-            artist_id = artist_info["id"]
-
-        # Get top tracks for the artist
-        headers = {
-            "Authorization": f"Bearer {token}"
-        }
-        response = requests.get(f"https://api.spotify.com/v1/artists/{artist_id}/top-tracks?country=US", headers=headers)
-
-        if response.status_code == 200:
-            top_tracks = response.json()["tracks"]
-            print("Artist's top tracks:", top_tracks)
-            return top_tracks
-        else:
-            print("Failed to get artist's top tracks.")
-            return None
+    def get_artist_top_tracks(self, token, artist_id, market="US"):
+        url = f"https://api.spotify.com/v1/artists/{artist_id}/top-tracks"
+        headers = self.get_auth_header(token)
+        params = {"market": market}
+        result = requests.get(url, headers=headers, params=params)
+        json_result = json.loads(result.content)
+        return json_result["tracks"]
 
 async def main():
     spotify_api = SpotifyAPI()

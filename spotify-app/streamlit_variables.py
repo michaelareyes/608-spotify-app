@@ -11,13 +11,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Read the contents of the CSS file
+with open("styles.css", "r") as file:
+    css = file.read()
+
 def local_css(file_name):
     with open(file_name) as f:
         st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
-
-# Testing Embedding
-def spotify_embed(embed_code):
-    st.components.v1.html(embed_code, height=400)
 
 def query_artist():
     # Get the artist name from user input
@@ -40,33 +40,19 @@ def query_artist():
             st.write("Failed to get top tracks.")
 
 
-
-# HTML and CSS to set background color for a section
-section_style = """
-    <style>
-        .section {
-            background-color: #f0f0f0; /* Change the color code to your desired background color */
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            text-align: center;
-        }
-    </style>
-"""
-
 # Function to create a section with a custom background color
 def custom_section(title, content):
     st.markdown(f"<div class='section'><h1>{title}</h1>{content}</div>", unsafe_allow_html=True)
-
-#local_css("style.css")
         
 # Use the full page instead of a narrow central column
 st.set_page_config(
-    page_title="Spotify App",
+    page_title="Spotify App"    ,
     page_icon=":notes:",
     layout="wide"
 )
 
+# Inject the CSS into the Streamlit app
+st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
 query_params = st.query_params.to_dict()
 
 def display_image(url):
@@ -82,27 +68,8 @@ def display_recommendations(df):
     track_names = df["track_name"]
     album_names = df["album"]
 
-    image_css = """
-        <style>
-            .center-align {
-                text-align: center;
-            }
-            .left-align {
-                text-align: left;
-            }
-            .image-container {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-            }
-            .image-container img {
-                width: 200px;
-                height: auto;
-            }
-        </style>
-    """
-
-    st.markdown(image_css, unsafe_allow_html=True)
+    # Display CSS styles defined in styles.css
+    st.markdown('<link rel="stylesheet" type="text/css" href="styles.css">', unsafe_allow_html=True)
 
     for i in range(0, len(images), 4):
         col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
@@ -110,11 +77,14 @@ def display_recommendations(df):
             index = i + j
             if index < len(images):
                 with col:
-                    st.markdown(image_css, unsafe_allow_html=True)
+                    # Apply CSS classes to elements using HTML
+                    st.markdown('<div class="image-container">', unsafe_allow_html=True)
                     st.image(images[index], width=200)
-                    st.markdown(f'<div style="text-align: center;"><b>{track_names[index]}</b></div>', unsafe_allow_html=True)
-                    st.markdown(f'<div style="text-align: center;"><i>Artist: {artist_names[index]}</i></div>', unsafe_allow_html=True)
-                    st.markdown(f'<div style="text-align: center;"><i>Album: {album_names[index]}</i></div>', unsafe_allow_html=True)
+                    st.markdown(f'<b class="text-center">{track_names[index]}</b>', unsafe_allow_html=True)
+                    st.markdown(f'<i class="text-center">Artist: {artist_names[index]}</i>', unsafe_allow_html=True)
+                    st.markdown(f'<i class="text-center">Album: {album_names[index]}</i>', unsafe_allow_html=True)
+                    st.markdown('</div>', unsafe_allow_html=True)
+
 
 def query_artist():
 
@@ -306,7 +276,11 @@ async def render_page_2():
             with col3:
                 st.image(df['images'][3])
 
-            # Streamlit Charts
+            ## Streamlit Charts
+
+            # Apply the custom style and display the heading
+            st.markdown("<h1 class='custom-heading-track-features'>Track Features Analysis</h1>", unsafe_allow_html=True)
+
 
             with st.container(border=True):
                 col1, col2 = st.columns(2)
@@ -333,10 +307,7 @@ async def render_page_2():
             # Initialize the toggle button state
             show_most = True
             
-
-            # Render the custom section
-            st.markdown(section_style, unsafe_allow_html=True)
-            custom_section("Track Features Analysis","")
+            st.markdown("<h1 class='custom-heading-top-moods'>Top Moods</h1>", unsafe_allow_html=True)
 
             show_most = st.checkbox("Show Most", value=True)
 

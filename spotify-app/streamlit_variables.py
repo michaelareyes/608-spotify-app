@@ -142,18 +142,17 @@ def render_page_1():
         
         query_artist()
         st.header("Your :rainbow[FAVES], at a glance...")
-
-        # Display Artist profile photos
+        # Top Artists at a glance
         col1, col2, col3 = st.columns(3)
         with col1:
             st.image(user_data['artist_url'][1], use_column_width='always')
-            st.subheader(f'*{user_data["top_artists"][1]}*')
+            st.subheader(f'*{user_data["top_artists"][random.randint(0,3)]}*')
         with col2:
             st.image(user_data['artist_url'][2], use_column_width='always')
-            st.subheader(f'*{user_data["top_artists"][2]}*')
+            st.subheader(f'*{user_data["top_artists"][random.randint(4,6)]}*')
         with col3:
             st.image(user_data['artist_url'][3], use_column_width='always')
-            st.subheader(f'*{user_data["top_artists"][3]}*')
+            st.subheader(f'*{user_data["top_artists"][random.randint(7,9)]}*')
         
         st.markdown("<h1 class='custom-heading-current-top'>Your Current Top</h1>", unsafe_allow_html=True)
 
@@ -308,8 +307,6 @@ async def render_page_2():
                 st.image(df['images'][2])
             with col3:
                 st.image(df['images'][3])
-
-            st.dataframe(df)
 
             ## Streamlit Charts
 

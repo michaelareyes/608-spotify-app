@@ -156,7 +156,6 @@ def render_page_1():
         
         st.markdown("<h1 class='custom-heading-current-top'>Your Current Top</h1>", unsafe_allow_html=True)
 
-        st.dataframe(user_data)
         col1, col2, col3 = st.columns(3)
 
         with col1:

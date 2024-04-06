@@ -145,20 +145,27 @@ def render_page_1():
         # Top Artists at a glance
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.image(user_data['artist_url'][1], use_column_width='always')
-            st.subheader(f'*{user_data["top_artists"][random.randint(0,3)]}*')
+            # Initialize random index
+            random_image_1 = random.randint(0,3)
+            random_image_2 = random.randint(4,6)
+            random_image_3 = random.randint(7,9)
+
+            st.image(user_data['artist_url'][random_image_1], use_column_width='always')
+            st.subheader(f'*{user_data["top_artists"][random_image_1]}*')
         with col2:
-            st.image(user_data['artist_url'][2], use_column_width='always')
-            st.subheader(f'*{user_data["top_artists"][random.randint(4,6)]}*')
+            st.image(user_data['artist_url'][random_image_2], use_column_width='always')
+            st.subheader(f'*{user_data["top_artists"][random_image_2]}*')
         with col3:
-            st.image(user_data['artist_url'][3], use_column_width='always')
-            st.subheader(f'*{user_data["top_artists"][random.randint(7,9)]}*')
+            st.image(user_data['artist_url'][random_image_3], use_column_width='always')
+            st.subheader(f'*{user_data["top_artists"][random_image_3]}*')
+
+        st.markdown("")
         
         st.markdown("<h1 class='custom-heading-current-top'>Your Current Top</h1>", unsafe_allow_html=True)
 
         col1, col2, col3 = st.columns(3)
 
-        with col1:
+        with col1: 
 
             st.header(':art: Artists', anchor=False)
             

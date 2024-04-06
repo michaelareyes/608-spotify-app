@@ -191,7 +191,7 @@ class SpotifyAPI:
         if artist_response.status_code == 200:
             top_artists = artist_response.json()
             names = [item['name'] for item in top_artists['items']]
-            artist_image_urls = [item['images'][2]["url"] for item in top_artists['items']] # get the one for 160px
+            artist_image_urls = [item['images'][0]["url"] for item in top_artists['items']] # get the one for 160px
             genres = [item['genres'] for item in top_artists['items']]
 
             user_data["top_artists"] = names

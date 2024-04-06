@@ -71,7 +71,7 @@ titles_page_2 = [
     "Wow, {display_name}, your playlist is as :rainbow[eclectic] as it gets! :guitar:",
     "You're a music :rainbow[explorer], {display_name}! Let's dive into more tunes! :headphones:",
     "Your music radar is :rainbow[unbeatable], {display_name}! Let's discover more hits! :sparkles:",
-    "You've got the :rainbow[vibe], {display_name}! Let's jam to some tunes! :drum:",
+    "You've got the :rainbow[vibe], {display_name}! Let's jam to some tunes! :drum_with_drumsticks:",
     ":rainbow[Rock on], {display_name}! Your music collection rocks! :metal:",
     "You're a melody :rainbow[maestro], {display_name}! Let's find more musical gems! :musical_note:",
     "Your playlist is a :rainbow[masterpiece], {display_name}! Let's add more colors to it! :art:",

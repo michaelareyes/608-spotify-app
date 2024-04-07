@@ -13,6 +13,49 @@
     text-align: center;
     font-size: 100px;
 }
+
+/* Custom heading styles for FAVE artists*/
+.custom-heading-fave-artists-glance {
+    text-align: left;
+    font-size: 80px;
+    text-decoration: underline;
+    text-decoration-color: lightgreen;
+    margin-bottom: 20px;
+}
+
+/* Custom heading styles for summary*/
+.custom-heading-summary {
+    text-align: center;
+    font-size: 60px;
+    text-decoration: underline;
+    text-decoration-color: lightseagreen;
+    margin-bottom: 20px;
+}
+/* Custom heading styles for Favourite artists*/
+.custom-heading-favourites{
+    text-align: center;
+    font-size: 40px;
+    margin-bottom: 20px;
+}
+
+/* Custom heading styles for Your FAVE TRACKS */
+.custom-heading-fave-tracks-glance {
+    text-align: right;
+    font-size: 80px;
+    text-decoration: underline;
+    text-decoration-color: indianred;
+    margin-bottom: 20px;
+}
+
+/* Custom heading styles for top Genres */
+.custom-heading-top-genres {
+    text-align: Left;
+    font-size: 80px;
+    text-decoration: underline;
+    text-decoration-color: lightblue;
+    margin-bottom: 10px;
+}
+
 /* Custom heading styles for Top Moods */
 .custom-heading-top-moods {
     text-align: right;
@@ -22,14 +65,6 @@
     margin-bottom: 20px;
 }
 
-/* Custom heading styles for Current top*/
-.custom-heading-current-top {
-    text-align: left;
-    font-size: 50px;
-    text-decoration: underline;
-    text-decoration-color: lightgreen;
-    margin-bottom: 20px;
-}
 /* Custom heading styles for Recommendations */
 .custom-heading-recommendations {
     text-align: right;
@@ -66,9 +101,12 @@
 
 /* Container */
 .st-emotion-cache-r421ms {
-    border: 3px solid rgba(49, 51, 63, 0.2);
+    border: 0.1x solid rgba(49, 51, 63, 0.2);
     border-radius: 0.5rem;
     padding: calc(1em - 1px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1); /* Subtle box shadow */
+    text-align: center; /* Center-align text */
+    transition: all 0.3s ease; /* Smooth transition */
 }
 
 /* Button */
@@ -89,4 +127,30 @@
     user-select: none;
     background-color: rgb(255, 255, 255);
     border: 1.2px solid rgba(49, 51, 63, 0.2);
+}
+
+/* SUMMARY BUTTON*/
+
+.st-emotion-cache-l9bjmx p {
+    text-decoration: solid;
+    text-decoration-color: lightblue;
+    word-break: break-word;
+    margin-bottom: 0px;
+    font-size: 40px;
+    font-family: sans-serif;
+    font-weight: bold;
+    justify-content: center;
+    
+}
+
+.st-emotion-cache-p5msec {
+    position: relative;
+    display: flex;
+    width: 100%;
+    font-size: 14px;
+    padding: 0.75rem 1rem;
+    list-style-type: none;
+    align-content: flex-end;
+    justify-content: center;
+    flex-direction: row-reverse;
 }

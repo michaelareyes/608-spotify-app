@@ -72,7 +72,7 @@ titles_page_2 = [
     "You're a music :rainbow[explorer], {display_name}! Let's dive into more tunes! :headphones:",
     "Your music radar is :rainbow[unbeatable], {display_name}! Let's discover more hits! :sparkles:",
     "You've got the :rainbow[vibe], {display_name}! Let's jam to some tunes! :drum_with_drumsticks:",
-    ":rainbow[Rock on], {display_name}! Your music collection rocks! :metal:",
+    ":rainbow[Rock on], {display_name}! Your music collection rocks! :sign_of_the_horns:",
     "You're a melody :rainbow[maestro], {display_name}! Let's find more musical gems! :musical_note:",
     "Your playlist is a :rainbow[masterpiece], {display_name}! Let's add more colors to it! :art:",
     "Your music journey is :rainbow[legendary], {display_name}! Let's embark on new adventures! :rocket:",
@@ -141,15 +141,15 @@ def render_page_1():
         st.title(f"Welcome, :rainbow[{display_name}!] :wave:")
         
         query_artist()
-        st.header("Your :rainbow[FAVES], at a glance...")
+        st.markdown("<h1 class='custom-heading-fave-artists-glance'>Your FAVE artists, at a glance...</h1>", unsafe_allow_html=True)
         # Top Artists at a glance
         col1, col2, col3 = st.columns(3)
+        # Initialize random index
+        random_image_1 = random.randint(0,3)
+        random_image_2 = random.randint(4,6)
+        random_image_3 = random.randint(7,9)
+        
         with col1:
-            # Initialize random index
-            random_image_1 = random.randint(0,3)
-            random_image_2 = random.randint(4,6)
-            random_image_3 = random.randint(7,9)
-
             st.image(user_data['artist_url'][random_image_1], use_column_width='always')
             st.subheader(f'*{user_data["top_artists"][random_image_1]}*')
         with col2:
@@ -159,43 +159,147 @@ def render_page_1():
             st.image(user_data['artist_url'][random_image_3], use_column_width='always')
             st.subheader(f'*{user_data["top_artists"][random_image_3]}*')
 
-        st.markdown("")
+        # st.markdown("<h1 class='custom-heading-favourite-artists'>Here's more of your favourite artists...</h1>", unsafe_allow_html=True)
+
+        # col1, col2, col3, col4, col5 = st.columns(5)
         
-        st.markdown("<h1 class='custom-heading-current-top'>Your Current Top</h1>", unsafe_allow_html=True)
+        # with col1: 
+        #     st.image(user_data['artist_url'][0], use_column_width='always')
+        #     st.subheader(f'*{user_data["top_artists"][0]}*', anchor=False)
+
+        #     st.image(user_data['artist_url'][5], use_column_width='always')
+        #     st.subheader(f'*{user_data["top_artists"][5]}*', anchor=False)
+
+        # with col2:
+        #     st.image(user_data['artist_url'][1], use_column_width='always')
+        #     st.subheader(f'*{user_data["top_artists"][1]}*', anchor=False)
+
+        #     st.image(user_data['artist_url'][6], use_column_width='always')
+        #     st.subheader(f'*{user_data["top_artists"][6]}*', anchor=False)
+        # with col3:
+        #     st.image(user_data['artist_url'][2], use_column_width='always')
+        #     st.subheader(f'*{user_data["top_artists"][2]}*', anchor=False)
+
+        #     st.image(user_data['artist_url'][7], use_column_width='always')
+        #     st.subheader(f'*{user_data["top_artists"][7]}*', anchor=False)
+        # with col4:
+        #     st.image(user_data['artist_url'][3], use_column_width='always')
+        #     st.subheader(f'*{user_data["top_artists"][3]}*', anchor=False)
+
+        #     st.image(user_data['artist_url'][8], use_column_width='always')
+        #     st.subheader(f'*{user_data["top_artists"][8]}*', anchor=False)
+        # with col5:
+        #     st.image(user_data['artist_url'][4], use_column_width='always')
+        #     st.subheader(f'*{user_data["top_artists"][4]}*', anchor=False)
+
+        #     st.image(user_data['artist_url'][9], use_column_width='always')
+        #     st.subheader(f'*{user_data["top_artists"][9]}*', anchor=False)
+
+        st.markdown("<h1 class='custom-heading-favourites'>Here's more of your favourite artists...</h1>", unsafe_allow_html=True)
+
+        num_artists = len(user_data['top_artists'])
+        num_columns = 5
+
+        # Define the number of rows required
+        num_rows = -(-num_artists // num_columns)
+
+        # Create columns dynamically
+        for i in range(num_rows):
+            columns = st.columns(num_columns)
+            for j in range(num_columns):
+                index = i * num_columns + j
+                if index < num_artists:
+                    with columns[j]:
+                        st.image(user_data['artist_url'][index], use_column_width='always')
+                        st.subheader(f'*{user_data["top_artists"][index]}*', anchor=False)
+
+        ## Favourite Tracks
+        st.markdown("<h1 class='custom-heading-fave-tracks-glance'>Your FAVE songs?</h1>", unsafe_allow_html=True)
 
         col1, col2, col3 = st.columns(3)
+        # Initialize random index
+        random_image_1 = random.randint(0,3)
+        random_image_2 = random.randint(4,6)
+        random_image_3 = random.randint(7,9)
 
-        with col1: 
-
-            st.header(':art: Artists', anchor=False)
-            
-            for i in range(len(user_data['top_artists'])):
-
-                c1, c2= st.columns((1,4))
-
-                with c1:
-                    st.image(user_data['artist_url'][i], use_column_width='always')
-
-                with c2:
-                    st.subheader(f'*{user_data["top_artists"][i]}*', anchor=False)
-
+        with col1:
+            st.image(user_data['track_url'][random_image_1], use_column_width='always')
+            st.subheader(f'*{user_data["top_tracks"][random_image_1]}*')
         with col2:
-            st.header(':cd: Tracks', anchor=False)
-            
-            for i in range(len(user_data['top_tracks'])):
-
-                c1, c2= st.columns((1,4))
-
-                with c1:
-                    st.image(user_data['track_url'][i], use_column_width='always')
-
-                with c2:
-                    st.subheader(f'*{user_data["top_tracks"][i]}*', anchor=False)
-        
+            st.image(user_data['track_url'][random_image_2], use_column_width='always')
+            st.subheader(f'*{user_data["top_tracks"][random_image_2]}*')
         with col3:
-            st.header(':violin: Genres', anchor=False)
-            for genre in user_data['top_genres'][:10]:
-                st.subheader(f'*{genre}*', anchor=False)
+            st.image(user_data['track_url'][random_image_3], use_column_width='always')
+            st.subheader(f'*{user_data["top_tracks"][random_image_3]}*')
+
+        with st.container(border=None):
+            st.markdown("<h1 class='custom-heading-favourites'>More on your favourite tracks....</h1>", unsafe_allow_html=True)
+
+            num_artists = len(user_data['top_tracks'])
+            num_columns = 5
+
+            # Define the number of rows required
+            num_rows = -(-num_artists // num_columns)
+
+            # Create columns dynamically
+            for i in range(num_rows):
+                columns = st.columns(num_columns)
+                for j in range(num_columns):
+                    index = i * num_columns + j
+                    if index < num_artists:
+                        with columns[j]:
+                            st.image(user_data['track_url'][index], use_column_width='always')
+                            st.subheader(f'*{user_data["top_tracks"][index]}*', anchor=False)
+
+        st.markdown("<h1 class='custom-heading-top-genres'>Your Top Genres</h1>", unsafe_allow_html=True)
+        
+        top_genres = user_data['top_genres'][:10]  # Assuming user_data['top_genres'] contains the top 10 genres
+
+        # Define a list of custom colors for genres
+        custom_colors = ["#FF5733", "#33FFB8", "#3378FF", "#FF33E0", "#33FF57", "#E033FF", "#F2FF33", "#336DFF", "#FF3333", "#33D6FF"]
+
+        for idx, (genre, color) in enumerate(zip(top_genres, custom_colors), start=1):
+            font_size = 100 - (idx - 1) * 10 
+            st.markdown(f"<h1 style='font-size:{font_size}px; color:{color};' class='custom-heading-top-three-genres'>{idx}. {genre}</h1>", unsafe_allow_html=True)
+
+        with st.container(border=True):
+            st.markdown("<h1 class='custom-heading-summary'>Your Summary</h1>", unsafe_allow_html=True)
+
+            with st.expander(""):
+
+                col1, col2, col3 = st.columns(3)
+
+                with col1: 
+
+                    st.header(':art: Artists', anchor=False)
+                    
+                    for i in range(len(user_data['top_artists'])):
+
+                        c1, c2= st.columns((1,4))
+
+                        with c1:
+                            st.image(user_data['artist_url'][i], use_column_width='always')
+
+                        with c2:
+                            st.subheader(f'*{user_data["top_artists"][i]}*', anchor=False)
+
+                with col2:
+                    st.header(':cd: Tracks', anchor=False)
+                    
+                    for i in range(len(user_data['top_tracks'])):
+
+                        c1, c2= st.columns((1,4))
+
+                        with c1:
+                            st.image(user_data['track_url'][i], use_column_width='always')
+
+                        with c2:
+                            st.subheader(f'*{user_data["top_tracks"][i]}*', anchor=False)
+                
+                with col3:
+                    st.header(':violin: Genres', anchor=False)
+                    for genre in user_data['top_genres'][:10]:
+                        st.subheader(f'*{genre}*', anchor=False)
 
 
         user_end_time = time.time() - start_time
@@ -304,15 +408,53 @@ async def render_page_2():
 
             # Display Artist name
             st.markdown(f"<h1 class='custom-heading-artist'>{st.session_state.name_artist}'s Discography</h1>", unsafe_allow_html=True)
-            
-            # Display Artist Profile Photos
+
+            # Display Artist Dashboard
+
+            # Initialize random index
+            discography_length = len(df)
+            random_image_1 = random.randint(0, discography_length - 1)
+            random_image_2 = random.randint(0, discography_length - 1)
+            random_image_3 = random.randint(0, discography_length - 1)
+
+            random_song_1 = random.randint(0, discography_length - 1)
+            random_song_2 = random.randint(0, discography_length - 1)
+            random_song_3 = random.randint(0, discography_length - 1)
+            random_song_4 = random.randint(0, discography_length - 1)
+            random_song_5 = random.randint(0, discography_length - 1)
+            random_song_6 = random.randint(0, discography_length - 1)
+
             col1, col2, col3 = st.columns(3)
             with col1:
-                st.image(df['images'][1])
+                st.image(df['images'][random_image_1])
             with col2:
-                st.image(df['images'][2])
+                st.image(df['images'][random_image_2])
             with col3:
-                st.image(df['images'][3])
+                track_id = df['track_id'][random_song_1]
+                embed_code = f'<iframe src="https://open.spotify.com/embed/track/{track_id}" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>'
+                st.markdown(embed_code, unsafe_allow_html=True)
+                track_id = df['track_id'][random_song_2]
+                embed_code = f'<iframe src="https://open.spotify.com/embed/track/{track_id}" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>'
+                st.markdown(embed_code, unsafe_allow_html=True)
+                track_id = df['track_id'][random_song_3]
+                embed_code = f'<iframe src="https://open.spotify.com/embed/track/{track_id}" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>'
+                st.markdown(embed_code, unsafe_allow_html=True)
+                track_id = df['track_id'][random_song_4]
+                embed_code = f'<iframe src="https://open.spotify.com/embed/track/{track_id}" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>'
+                st.markdown(embed_code, unsafe_allow_html=True)
+
+            col1, col2 = st.columns(2)
+            with col1:
+                track_id = df['track_id'][random_song_5]
+                embed_code = f'<iframe src="https://open.spotify.com/embed/track/{track_id}" width="100%" height="500" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>'
+                st.markdown(embed_code, unsafe_allow_html=True)
+            with col2:
+                st.image(df['images'][random_image_3])
+
+            track_id = df['track_id'][random_song_6]
+            embed_code = f'<iframe src="https://open.spotify.com/embed/track/{track_id}" width="100%" height="500" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>'
+            st.markdown(embed_code, unsafe_allow_html=True)
+
 
             ## Streamlit Charts
 

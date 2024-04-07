@@ -72,7 +72,7 @@ titles_page_2 = [
     "You're a music :rainbow[explorer], {display_name}! Let's dive into more tunes! :headphones:",
     "Your music radar is :rainbow[unbeatable], {display_name}! Let's discover more hits! :sparkles:",
     "You've got the :rainbow[vibe], {display_name}! Let's jam to some tunes! :drum_with_drumsticks:",
-    ":rainbow[Rock on], {display_name}! Your music collection rocks! :metal:",
+    ":rainbow[Rock on], {display_name}! Your music collection rocks! :sign_of_the_horns:",
     "You're a melody :rainbow[maestro], {display_name}! Let's find more musical gems! :musical_note:",
     "Your playlist is a :rainbow[masterpiece], {display_name}! Let's add more colors to it! :art:",
     "Your music journey is :rainbow[legendary], {display_name}! Let's embark on new adventures! :rocket:",
@@ -423,7 +423,7 @@ async def render_page_2():
             random_song_4 = random.randint(0, discography_length - 1)
             random_song_5 = random.randint(0, discography_length - 1)
             random_song_6 = random.randint(0, discography_length - 1)
-            
+
             col1, col2, col3 = st.columns(3)
             with col1:
                 st.image(df['images'][random_image_1])

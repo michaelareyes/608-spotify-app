@@ -17,7 +17,7 @@
 /* Custom heading styles for FAVE artists*/
 .custom-heading-fave-artists-glance {
     text-align: left;
-    font-size: 60px;
+    font-size: 80px;
     text-decoration: underline;
     text-decoration-color: lightgreen;
     margin-bottom: 20px;
@@ -41,7 +41,7 @@
 /* Custom heading styles for Your FAVE TRACKS */
 .custom-heading-fave-tracks-glance {
     text-align: right;
-    font-size: 60px;
+    font-size: 80px;
     text-decoration: underline;
     text-decoration-color: indianred;
     margin-bottom: 20px;
@@ -50,18 +50,10 @@
 /* Custom heading styles for top Genres */
 .custom-heading-top-genres {
     text-align: Left;
-    font-size: 60px;
+    font-size: 80px;
     text-decoration: underline;
     text-decoration-color: lightblue;
-    margin-bottom: 20px;
-}
-
-/* Custom heading styles: First Genre */
-.custom-heading-first-genre {
-    text-align: left;
-    text-decoration: underline;
-    margin-bottom: 20px;
-    font-size: 60px;
+    margin-bottom: 10px;
 }
 
 /* Custom heading styles for Top Moods */
@@ -135,4 +127,30 @@
     user-select: none;
     background-color: rgb(255, 255, 255);
     border: 1.2px solid rgba(49, 51, 63, 0.2);
+}
+
+/* SUMMARY BUTTON*/
+
+.st-emotion-cache-l9bjmx p {
+    text-decoration: solid;
+    text-decoration-color: lightblue;
+    word-break: break-word;
+    margin-bottom: 0px;
+    font-size: 40px;
+    font-family: sans-serif;
+    font-weight: bold;
+    justify-content: center;
+    
+}
+
+.st-emotion-cache-p5msec {
+    position: relative;
+    display: flex;
+    width: 100%;
+    font-size: 14px;
+    padding: 0.75rem 1rem;
+    list-style-type: none;
+    align-content: flex-end;
+    justify-content: center;
+    flex-direction: row-reverse;
 }

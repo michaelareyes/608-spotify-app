@@ -392,189 +392,201 @@ async def render_page_2():
         params = {'artist': Name_of_Artist}
         artist_time = time.time()
 
-        # Make an HTTP GET request to the API endpoint for SEARCH
-        response = requests.get(base_url + "search", params=params)
+        # Retry mechanism
+        max_retries = 2
+        retry_count = 0
+        while retry_count < max_retries:
 
-        artist_end_time = time.time() - artist_time
-        print(f"Time taken for search_view function: {artist_end_time} seconds")
+            response = requests.get(base_url + "search", params=params)
 
-        if response.status_code == 200:
-            
-            data = response.json()
+            artist_end_time = time.time() - artist_time
+            print(f"Time taken for search_view function: {artist_end_time} seconds")
 
-            df = pd.read_json(data["df"])
+            if response.status_code == 200:
+                
+                data = response.json()
 
-            radar_chart_df = pd.read_json(data["radar_chart"])
+                df = pd.read_json(data["df"])
 
-            # Display Artist name
-            st.markdown(f"<h1 class='custom-heading-artist'>{st.session_state.name_artist}'s Discography</h1>", unsafe_allow_html=True)
+                radar_chart_df = pd.read_json(data["radar_chart"])
 
-            # Display Artist Dashboard
+                # Display Artist name
+                st.markdown(f"<h1 class='custom-heading-artist'>{st.session_state.name_artist}'s Discography</h1>", unsafe_allow_html=True)
 
-            # Initialize random index
-            discography_length = len(df)
-            random_image_1 = random.randint(0, discography_length - 1)
-            random_image_2 = random.randint(0, discography_length - 1)
-            random_image_3 = random.randint(0, discography_length - 1)
+                # Display Artist Dashboard
 
-            random_song_1 = random.randint(0, discography_length - 1)
-            random_song_2 = random.randint(0, discography_length - 1)
-            random_song_3 = random.randint(0, discography_length - 1)
-            random_song_4 = random.randint(0, discography_length - 1)
-            random_song_5 = random.randint(0, discography_length - 1)
-            random_song_6 = random.randint(0, discography_length - 1)
+                # Initialize random index
+                discography_length = len(df)
+                random_image_1 = random.randint(0, discography_length - 1)
+                random_image_2 = random.randint(0, discography_length - 1)
+                random_image_3 = random.randint(0, discography_length - 1)
 
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                st.image(df['images'][random_image_1])
-            with col2:
-                st.image(df['images'][random_image_2])
-            with col3:
-                track_id = df['track_id'][random_song_1]
-                embed_code = f'<iframe src="https://open.spotify.com/embed/track/{track_id}" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>'
-                st.markdown(embed_code, unsafe_allow_html=True)
-                track_id = df['track_id'][random_song_2]
-                embed_code = f'<iframe src="https://open.spotify.com/embed/track/{track_id}" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>'
-                st.markdown(embed_code, unsafe_allow_html=True)
-                track_id = df['track_id'][random_song_3]
-                embed_code = f'<iframe src="https://open.spotify.com/embed/track/{track_id}" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>'
-                st.markdown(embed_code, unsafe_allow_html=True)
-                track_id = df['track_id'][random_song_4]
-                embed_code = f'<iframe src="https://open.spotify.com/embed/track/{track_id}" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>'
-                st.markdown(embed_code, unsafe_allow_html=True)
+                random_song_1 = random.randint(0, discography_length - 1)
+                random_song_2 = random.randint(0, discography_length - 1)
+                random_song_3 = random.randint(0, discography_length - 1)
+                random_song_4 = random.randint(0, discography_length - 1)
+                random_song_5 = random.randint(0, discography_length - 1)
+                random_song_6 = random.randint(0, discography_length - 1)
 
-            col1, col2 = st.columns(2)
-            with col1:
-                track_id = df['track_id'][random_song_5]
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.image(df['images'][random_image_1])
+                with col2:
+                    st.image(df['images'][random_image_2])
+                with col3:
+                    track_id = df['track_id'][random_song_1]
+                    embed_code = f'<iframe src="https://open.spotify.com/embed/track/{track_id}" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>'
+                    st.markdown(embed_code, unsafe_allow_html=True)
+                    track_id = df['track_id'][random_song_2]
+                    embed_code = f'<iframe src="https://open.spotify.com/embed/track/{track_id}" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>'
+                    st.markdown(embed_code, unsafe_allow_html=True)
+                    track_id = df['track_id'][random_song_3]
+                    embed_code = f'<iframe src="https://open.spotify.com/embed/track/{track_id}" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>'
+                    st.markdown(embed_code, unsafe_allow_html=True)
+                    track_id = df['track_id'][random_song_4]
+                    embed_code = f'<iframe src="https://open.spotify.com/embed/track/{track_id}" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>'
+                    st.markdown(embed_code, unsafe_allow_html=True)
+
+                col1, col2 = st.columns(2)
+                with col1:
+                    track_id = df['track_id'][random_song_5]
+                    embed_code = f'<iframe src="https://open.spotify.com/embed/track/{track_id}" width="100%" height="500" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>'
+                    st.markdown(embed_code, unsafe_allow_html=True)
+                with col2:
+                    st.image(df['images'][random_image_3])
+
+                track_id = df['track_id'][random_song_6]
                 embed_code = f'<iframe src="https://open.spotify.com/embed/track/{track_id}" width="100%" height="500" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>'
                 st.markdown(embed_code, unsafe_allow_html=True)
-            with col2:
-                st.image(df['images'][random_image_3])
-
-            track_id = df['track_id'][random_song_6]
-            embed_code = f'<iframe src="https://open.spotify.com/embed/track/{track_id}" width="100%" height="500" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>'
-            st.markdown(embed_code, unsafe_allow_html=True)
 
 
-            ## Streamlit Charts
+                ## Streamlit Charts
 
-            st.markdown("<h1 class='custom-heading-track-features'>Track Features Analysis</h1>", unsafe_allow_html=True)
+                st.markdown("<h1 class='custom-heading-track-features'>Track Features Analysis</h1>", unsafe_allow_html=True)
 
-            with st.container(border=True):
-                col1, col2 = st.columns(2)
+                with st.container(border=True):
+                    col1, col2 = st.columns(2)
 
-                # Display the radar chart
-                with col1:
-                    st.title("Radar Chart")
-                    radar_start = time.time()
-                    radar_chart(radar_chart_df)
-                    radar_end_time = time.time() - radar_start
-                    print(f"Time taken for radar chart: {radar_end_time} seconds")
+                    # Display the radar chart
+                    with col1:
+                        st.title("Radar Chart")
+                        radar_start = time.time()
+                        radar_chart(radar_chart_df)
+                        radar_end_time = time.time() - radar_start
+                        print(f"Time taken for radar chart: {radar_end_time} seconds")
 
-                ## Tracklist Trend
-                with col2:
-                    st.title("Tracklist Trend")
-                    st.subheader("Shows the trend of tracks by track features:")
-                    tracklist_start = time.time()
-                    tracklist_trend(df)
-                    tracklist_end_time = time.time() - tracklist_start
-                    print(f"Time taken for tracklist trend chart: {tracklist_end_time} seconds")
+                    ## Tracklist Trend
+                    with col2:
+                        st.title("Tracklist Trend")
+                        st.subheader("Shows the trend of tracks by track features:")
+                        tracklist_start = time.time()
+                        tracklist_trend(df)
+                        tracklist_end_time = time.time() - tracklist_start
+                        print(f"Time taken for tracklist trend chart: {tracklist_end_time} seconds")
 
-            ## Top Tracks by track_features
+                ## Top Tracks by track_features
+                
+                # Initialize the toggle button state
+                show_most = True
+                
+                st.markdown("<h1 class='custom-heading-top-moods'>Top Moods</h1>", unsafe_allow_html=True)
+
+                show_most = st.checkbox("Show Most", value=True)
+
+                with st.container(border=True):
+                    col1, col2 = st.columns(2)
+
+                    with col1:
+                        
+                        # Display top energetic tracks
+                        if show_most:
+                            st.title(":zap: Most Energetic Tracks")
+                            st.subheader("Energetic tracks feel upbeat, fast, and loud.")
+                            top_energy_tracks_df = df.sort_values('energy', ascending=False).head(3)
+                        else:
+                            st.title(":rain_cloud: Least Energetic Tracks")
+                            st.subheader("Unenergetic tracks feel downbeat, slow, and quiet.")
+                            top_energy_tracks_df = df.sort_values('energy', ascending=True).head(3)
+                        
+                        top_energy_track_names = top_energy_tracks_df['track_name'].tolist()
+                        
+                        for index, row in top_energy_tracks_df.iterrows():
+                            track_id = row['track_id']
+                            embed_code = f'<iframe src="https://open.spotify.com/embed/track/{track_id}" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>'
+                            st.markdown(embed_code, unsafe_allow_html=True)
+
+                    with col2:
+                        # Display top acoustic tracks
+                        if show_most:
+                            st.title(":guitar: Most Acoustic Tracks")
+                            st.subheader("Acoustic tracks feel more instrumental, vocal, and raw.")
+                            top_acoustic_tracks_df = df.sort_values('acousticness', ascending=False).head(3)
+                        else:
+                            st.title(":radio: Least Acoustic Tracks")
+                            st.subheader("Unacoustic tracks feel less instrumental, vocal, and raw.")
+                            top_acoustic_tracks_df = df.sort_values('acousticness', ascending=True).head(3)
+
+                        top_acoustic_track_names = top_acoustic_tracks_df['track_name'].tolist()
+                        
+                        for index, row in top_acoustic_tracks_df.iterrows():
+                            track_id = row['track_id']
+                            embed_code = f'<iframe src="https://open.spotify.com/embed/track/{track_id}" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>'
+                            st.markdown(embed_code, unsafe_allow_html=True)
+                
+                with st.container(border=True):
+                    col1, col2 = st.columns(2)
+
+                    with col1:
+                        # Display top danceable songs
+                        if show_most:
+                            st.title(":dancer: Most Danceable Tracks:")
+                            st.subheader("Danceable songs have strong beats, stable rhythms, and regular tempos!")
+                            top_danceability_tracks_df = df.sort_values('danceability', ascending=False).head(3)
+                        else:
+                            st.title(":sleeping: Least Danceable Tracks:")
+                            st.subheader("Undanceable songs have weak beats, unstable rhythms, and irregular tempos")
+                            top_danceability_tracks_df = df.sort_values('danceability', ascending=True).head(3)
+
+                        top_danceability_track_names = top_danceability_tracks_df['track_name'].tolist()
+                        
+                        for index, row in top_danceability_tracks_df.iterrows():
+                            track_id = row['track_id']
+                            embed_code = f'<iframe src="https://open.spotify.com/embed/track/{track_id}" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>'
+                            st.markdown(embed_code, unsafe_allow_html=True)
+
+                    with col2:
+                        # Display top happy songs
+                        if show_most:
+                            st.title(":smile_cat: Most Happy Tracks:")
+                            st.subheader("Happy songs are measured by musical positivety that likely make you feel cheerful or euphoric.")
+                            top_valence_tracks_df = df.sort_values('valence', ascending=False).head(3)
+                        else:
+                            st.title(":crying_cat_face: Least Happy Tracks:")
+                            st.subheader("Unhappy songs are measured by musical positivety that likely make you feel upset or emotional.")
+                            top_valence_tracks_df = df.sort_values('valence', ascending=True).head(3)
+
+                        top_valence_track_names = top_valence_tracks_df['track_name'].tolist()
+
+                        for index, row in top_valence_tracks_df.iterrows():
+                            track_id = row['track_id']
+                            embed_code = f'<iframe src="https://open.spotify.com/embed/track/{track_id}" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>'
+                            st.markdown(embed_code, unsafe_allow_html=True)
+
+                break
+
+            elif response.status_code == 500:
+                # Retry after waiting for 3 seconds
+                time.sleep(3)
+                retry_count += 1
+                continue
+            else:
+                # Handle other status codes
+                st.warning("Failed to retrieve data. Please try again later.")
+                return
             
-            # Initialize the toggle button state
-            show_most = True
-            
-            st.markdown("<h1 class='custom-heading-top-moods'>Top Moods</h1>", unsafe_allow_html=True)
+        if retry_count == max_retries:
+            st.warning("Failed to retrieve data after multiple attempts. Please try again later.")
 
-            show_most = st.checkbox("Show Most", value=True)
-
-            with st.container(border=True):
-                col1, col2 = st.columns(2)
-
-                with col1:
-                    
-                    # Display top energetic tracks
-                    if show_most:
-                        st.title(":zap: Most Energetic Tracks")
-                        st.subheader("Energetic tracks feel upbeat, fast, and loud.")
-                        top_energy_tracks_df = df.sort_values('energy', ascending=False).head(3)
-                    else:
-                        st.title(":rain_cloud: Least Energetic Tracks")
-                        st.subheader("Unenergetic tracks feel downbeat, slow, and quiet.")
-                        top_energy_tracks_df = df.sort_values('energy', ascending=True).head(3)
-                    
-                    top_energy_track_names = top_energy_tracks_df['track_name'].tolist()
-                    
-                    for index, row in top_energy_tracks_df.iterrows():
-                        track_id = row['track_id']
-                        embed_code = f'<iframe src="https://open.spotify.com/embed/track/{track_id}" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>'
-                        st.markdown(embed_code, unsafe_allow_html=True)
-
-                with col2:
-                    # Display top acoustic tracks
-                    if show_most:
-                        st.title(":guitar: Most Acoustic Tracks")
-                        st.subheader("Acoustic tracks feel more instrumental, vocal, and raw.")
-                        top_acoustic_tracks_df = df.sort_values('acousticness', ascending=False).head(3)
-                    else:
-                        st.title(":radio: Least Acoustic Tracks")
-                        st.subheader("Unacoustic tracks feel less instrumental, vocal, and raw.")
-                        top_acoustic_tracks_df = df.sort_values('acousticness', ascending=True).head(3)
-
-                    top_acoustic_track_names = top_acoustic_tracks_df['track_name'].tolist()
-                    
-                    for index, row in top_acoustic_tracks_df.iterrows():
-                        track_id = row['track_id']
-                        embed_code = f'<iframe src="https://open.spotify.com/embed/track/{track_id}" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>'
-                        st.markdown(embed_code, unsafe_allow_html=True)
-            
-            with st.container(border=True):
-                col1, col2 = st.columns(2)
-
-                with col1:
-                    # Display top danceable songs
-                    if show_most:
-                        st.title(":dancer: Most Danceable Tracks:")
-                        st.subheader("Danceable songs have strong beats, stable rhythms, and regular tempos!")
-                        top_danceability_tracks_df = df.sort_values('danceability', ascending=False).head(3)
-                    else:
-                        st.title(":sleeping: Least Danceable Tracks:")
-                        st.subheader("Undanceable songs have weak beats, unstable rhythms, and irregular tempos")
-                        top_danceability_tracks_df = df.sort_values('danceability', ascending=True).head(3)
-
-                    top_danceability_track_names = top_danceability_tracks_df['track_name'].tolist()
-                    
-                    for index, row in top_danceability_tracks_df.iterrows():
-                        track_id = row['track_id']
-                        embed_code = f'<iframe src="https://open.spotify.com/embed/track/{track_id}" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>'
-                        st.markdown(embed_code, unsafe_allow_html=True)
-
-                with col2:
-                    # Display top happy songs
-                    if show_most:
-                        st.title(":smile_cat: Most Happy Tracks:")
-                        st.subheader("Happy songs are measured by musical positivety that likely make you feel cheerful or euphoric.")
-                        top_valence_tracks_df = df.sort_values('valence', ascending=False).head(3)
-                    else:
-                        st.title(":crying_cat_face: Least Happy Tracks:")
-                        st.subheader("Unhappy songs are measured by musical positivety that likely make you feel upset or emotional.")
-                        top_valence_tracks_df = df.sort_values('valence', ascending=True).head(3)
-
-                    top_valence_track_names = top_valence_tracks_df['track_name'].tolist()
-
-                    for index, row in top_valence_tracks_df.iterrows():
-                        track_id = row['track_id']
-                        embed_code = f'<iframe src="https://open.spotify.com/embed/track/{track_id}" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>'
-                        st.markdown(embed_code, unsafe_allow_html=True)
-
-            
-        else:
-            return {
-                'Error': 'Error in search_view()',
-                'status_code': response.status_code,
-                'message': response.text
-            }
     else:
         st.warning("Please enter an artist name.")
 

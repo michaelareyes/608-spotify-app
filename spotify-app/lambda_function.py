@@ -58,9 +58,18 @@ def lambda_handler(event, context):
     if event["rawPath"] == "/search":
         params = event["queryStringParameters"]
         artist_name = params["artist"]
-            
-        result = asyncio.get_event_loop().run_until_complete(wait_search_view(artist_name))
-        return result
+        
+        try:
+            result = asyncio.get_event_loop().run_until_complete(wait_search_view(artist_name))
+            return result
+        
+        except Exception as e:
+            error_message = "An error occurred. Please try again later."
+            resp = {
+                "statusCode": 500,
+                "body": error_message
+            }
+            return json.dumps(resp)
     
     elif event["rawPath"] == "/user_data":
         print("lambda_function: Getting User Data")

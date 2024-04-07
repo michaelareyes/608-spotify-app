@@ -33,6 +33,32 @@ The application to run our codes consists of several files, each serving a speci
 
 5. **streamlit_variables.py**: This script leverages the Streamlit library to craft an interactive web-based interface tailored for visualizing user data. It serves as the front-end component of the application, seamlessly communicating with both the Flask application and AWS Lambda function. Through the Flask application, it retrieves insights on the user's top artists, tracks, and genres, providing a comprehensive overview of their music preferences. Moreover, it seamlessly integrates with the AWS Lambda function to dynamically fetch and exhibit detailed insights when a user queries an artist, offering comprehensive analyses of their track features. 
 
+## Python Package Descriptions
+
+| Package Name    | Description                                                                                     |
+|-----------------|-------------------------------------------------------------------------------------------------|
+| requests        | A Python HTTP library that allows sending HTTP requests easily, making API calls and handling responses. |
+| urllib.parse    | A Python library for parsing and manipulating URLs.                                             |
+| json            | A Python library for encoding and decoding JSON data.                                            |
+| datetime        | A Python module for manipulating dates and times.                                                |
+| flask           | A lightweight web application framework for Python.                                              |
+| collections     | A Python module that provides specialized container datatypes, such as Counter.                  |
+| itertools       | A module providing functions creating iterators for efficient looping.                           |
+| os              | A module in Python that provides a way of using operating system dependent functionality.         |
+| dotenv          | A Python module that allows loading environment variables from a .env file.                      |
+| io              | A core Python module for handling I/O operations.                                                |
+| boto3           | The Amazon Web Services (AWS) SDK for Python.                                                    |
+| base64          | A Python module for encoding and decoding base64-encoded strings.                                 |
+| random          | A Python module that generates random numbers.                                                    |
+| pandas          | A powerful data analysis and manipulation library for Python.                                     |
+| awswrangler     | A utility library for simplifying the interaction with AWS services, particularly Amazon Redshift and S3. |
+| sqlalchemy      | A SQL toolkit and Object-Relational Mapping (ORM) library for Python.                             |
+| aiohttp         | An asynchronous HTTP client/server framework for Python.                                          |
+| plotly.express  | A Python library for creating interactive plots and figures.                                      |
+| streamlit       | A Python library for creating interactive web apps for data science and machine learning projects. |
+| dotenv          | A Python module that allows loading environment variables from a .env file.                      |
+
+
 
 ## Connecting Files
 

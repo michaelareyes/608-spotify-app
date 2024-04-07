@@ -172,8 +172,6 @@ def extract_relevant_info(artist_id):
         })
     
     df = pd.DataFrame(df)
-    
-    print(df, "recommendations")
 
     extract_relevant_info_time = time.time() - start_time
     print(f"spotify_db: Time taken for extracting relevant information: {extract_relevant_info_time} seconds")

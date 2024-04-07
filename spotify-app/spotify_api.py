@@ -216,7 +216,7 @@ class SpotifyAPI:
         if tracks_response.status_code == 200:
             top_tracks = tracks_response.json()
             track_names = [item['name'] for item in top_tracks['items']]
-            track_image_urls = [item["album"]['images'][2]["url"]for item in top_tracks['items']] # get the one for 160px
+            track_image_urls = [item["album"]['images'][0]["url"]for item in top_tracks['items']] # get the one for 160px
             
             user_data["top_tracks"] = track_names
             user_data["track_url"] = track_image_urls

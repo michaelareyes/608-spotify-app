@@ -324,6 +324,8 @@ def radar_chart(avg_df):
         title="Average Features Radar Chart"
     )
     
+    fig.update_layout(height=600, width=600)
+
     # Display the radar chart
     st.plotly_chart(fig)
 

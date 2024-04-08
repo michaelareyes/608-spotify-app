@@ -5,14 +5,19 @@ from datetime import datetime, timedelta
 from flask import Flask, redirect, request, jsonify, session
 from collections import Counter
 import itertools
+import os
+from dotenv import load_dotenv
+import time
+
+load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = 'f42fa124d2627f97aad0adbdc1ef089300087684ecd2a990'
+app.secret_key = os.getenv("FLASK_SECRET_KEY")
 
-PUBLIC_IP = '44.218.178.62'
+PUBLIC_IP = os.getenv("PUBLIC_IP")
 
-CLIENT_ID = 'e83d0b4c2eab4287adbd9830d18ac151'
-CLIENT_SECRET = 'e3e62bcb12ed41bebadf1951985076b8'
+CLIENT_ID = os.getenv('CLIENT_ID')
+CLIENT_SECRET = os.getenv('CLIENT_SECRET')
 REDIRECT_URI = f'http://{PUBLIC_IP}:5001/callback'
 
 AUTH_URL = 'https://accounts.spotify.com/authorize'
@@ -189,69 +194,30 @@ def streamlit_ui():
         "Authorization": f"Bearer {session['access_token']}"
     }
 
-    user_data = {}
+    start_time = time.time()
 
-    # GET USERNAME
-    response = requests.get(API_BASE_URL + "me", headers=headers)
+    get_data_url = 'https://37z3tbz3z4.execute-api.us-east-1.amazonaws.com/user_data'
+
+    response = requests.get(get_data_url, params=headers)
+
     if response.status_code == 200:
-        user = response.json()
-        user_data["username"] = user['display_name']
+    
+        user_data = json.dumps(response.json())
+        user_data = urllib.parse.quote(user_data)
+
+        user_end_time = time.time() - start_time
+
+        print(f"Flask Spotify: Time taken for obtaining user info: {user_end_time} seconds")
+
+        return redirect(f'http://{PUBLIC_IP}:8501?user={user_data}')
     
     else:
-        error_message = {'message': 'Failed to get user\'s data ', 
-                         'status_code': response.status_code,
-                         'response_error': response.text}
-        return error_message
 
-    # GET TOP 10 ARTISTS
-
-    top_artist_url = API_BASE_URL + "me/top/artists?limit=10"
-    artist_response = requests.get(top_artist_url, headers=headers)
-
-    if artist_response.status_code == 200:
-        top_artists = artist_response.json()
-        names = [item['name'] for item in top_artists['items']]
-        artist_image_urls = [item['images'][2]["url"] for item in top_artists['items']] # get the one for 160px
-        genres = [item['genres'] for item in top_artists['items']]
-
-        user_data["top_artists"] = names
-        user_data["artist_url"] = artist_image_urls
-        genres_count = Counter(list(itertools.chain(*genres)))
-        user_data["top_genres"] = [genre for genre, _ in genres_count.most_common(10)]
-    
-    else:
-        error_message = {'message': 'Failed to get user\'s top artists ', 
-                         'status_code': artist_response.status_code,
-                         'response_error': artist_response.text}
-        return error_message
-    
-    # GET TOP 10 TRACKS
-    
-    top_tracks_url = API_BASE_URL + "me/top/tracks?limit=10"
-    tracks_response = requests.get(top_tracks_url, headers=headers)
-
-    if tracks_response.status_code == 200:
-        top_tracks = tracks_response.json()
-        track_names = [item['name'] for item in top_tracks['items']]
-        track_image_urls = [item["album"]['images'][2]["url"]for item in top_tracks['items']] # get the one for 160px
-        
-        user_data["top_tracks"] = track_names
-        user_data["track_url"] = track_image_urls
-    
-    else:
-        error_message = {'message': 'Failed to get user\'s top tracks ', 
-                         'status_code': tracks_response.status_code,
-                         'response_error': tracks_response.text}
-        return error_message
-    
-    
-    user_data = json.dumps(user_data)
-    user_data = urllib.parse.quote(user_data)
-
-    print(user_data)
-
-
-    return redirect(f'http://{PUBLIC_IP}:8501?user={user_data}')  # Replace with your Streamlit UI URL
+        return {
+            'Error': 'Error in streamlit_ui()',
+            'status_code': response.status_code,
+            'message': response.text
+        }
         
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)

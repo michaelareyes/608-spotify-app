@@ -85,8 +85,9 @@ class SpotifyAPI:
                         "track_number": track["track_number"],
                         "artists": track["artists"]
                     }
-                    tracks_dict.update(features)
-                    tracks_info.append(tracks_dict)
+                    if features is not None:
+                        tracks_dict.update(features)
+                        tracks_info.append(tracks_dict)
                 return tracks_info
 
     async def get_discography_with_features(self, artist_id):
@@ -107,6 +108,7 @@ class SpotifyAPI:
                     images = album["images"]
                     artists = album["artists"]
                     album_tracks_with_features = await self.get_album_tracks_with_audio_features(album["id"])
+                    print("spotify_api.py: Trying to get album tracks with features:", album_tracks_with_features)
                     discography_with_features.append({
                         "album_id": album_id,
                         "album_name": album_name,

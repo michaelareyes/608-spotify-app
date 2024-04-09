@@ -412,6 +412,8 @@ async def render_page_2():
 
                 radar_chart_df = pd.read_json(data["radar_chart"])
 
+                st.snow()
+
                 # Display Artist name
                 st.markdown(f"<h1 class='custom-heading-artist'>{st.session_state.name_artist}'s Discography</h1>", unsafe_allow_html=True)
 

@@ -8,6 +8,9 @@ Our app features a user-friendly dashboard that offers a personalized overview o
 ## Artist Query
 In addition to the user dashboard, our app allows users to query specific artists to access detailed information about them. Users can search for their favorite artists, and our app retrieves comprehensive data about the artist's tracks, including features such as duration, tempo, energy, and more. This feature enables users to dive deeper into their favorite artists' music and gain a better understanding of their style and sound.
 
+A simple demo of our application:
+
+[![Watch the video](https://img.youtube.com/vi/e73Uf9bYfAE/maxresdefault.jpg)](https://youtu.be/e73Uf9bYfAE)
 
 # Overview
 
